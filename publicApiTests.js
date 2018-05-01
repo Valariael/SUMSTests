@@ -41,15 +41,8 @@ QUnit.test(
     assert.ok(
       Object.prototype.hasOwnProperty.call(data, 'markingForm'),
       'data has a `markingForm` attribute.',
-    );/* no prizes for now ?
-    assert.ok(
-      Object.prototype.hasOwnProperty.call(data.markingForm, 'prizes'),
-      'data.markingForm has a `prizes` attribute.',
     );
-    assert.ok(
-      Object.prototype.hasOwnProperty.call(data.markingForm, 'prizesUrl'),
-      'data.markingForm has a `prizesUrl` attribute.',
-    ); */
+
     assert.ok(
       Object.prototype.hasOwnProperty.call(data.markingForm, 'categories'),
       'data.markingForm has a `categories` attribute.',
@@ -105,7 +98,6 @@ QUnit.test(
       data.unit !== '',
       'data.unit is not empty.',
     );
-    // regexp ?
 
     assert.equal(
       typeof (data.year),
@@ -123,8 +115,8 @@ QUnit.test(
     );
 
     for (let i = 0; i < data.markingForm.categories.length; i += 1) {
-      const dataPath = data.markingForm.categories[i];
-      const dataStr = 'data.markingForm.categories[' + i + '].';
+      const category = data.markingForm.categories[i];
+      const categoryStr = 'data.markingForm.categories[' + i + '].';
 
       assert.ok(
         Object.prototype.hasOwnProperty.call(data.markingForm.categories[i], 'compulsory'),
@@ -148,88 +140,85 @@ QUnit.test(
       );
 
       assert.equal(
-        typeof (dataPath.compulsory),
+        typeof (category.compulsory),
         'boolean',
-        dataStr + 'compulsory is a boolean.',
+        categoryStr + 'compulsory is a boolean.',
       );
 
       assert.equal(
-        typeof (dataPath.description),
+        typeof (category.description),
         'string',
-        dataStr + 'description is a string.',
+        categoryStr + 'description is a string.',
       );
 
       assert.equal(
-        typeof (dataPath.name),
+        typeof (category.name),
         'string',
-        dataStr + 'name is a string.',
+        categoryStr + 'name is a string.',
       );
 
       assert.equal(
-        typeof (dataPath.weight),
+        typeof (category.weight),
         'number',
-        dataStr + 'weight is a number.',
+        categoryStr + 'weight is a number.',
       );
       assert.ok(
-        dataPath.weight > 0,
-        dataStr + 'weight is positive.',
+        category.weight > 0,
+        categoryStr + 'weight is positive.',
       );
 
       assert.ok(
-        Array.isArray(dataPath.levels),
-        dataStr + 'levels is an array.',
+        Array.isArray(category.levels),
+        categoryStr + 'levels is an array.',
       );
       assert.ok(
-        dataPath.levels.length > 0,
-        dataStr + 'levels is not empty.',
+        category.levels.length > 0,
+        categoryStr + 'levels is not empty.',
       );
 
       let previousUpTo = 0;
 
-      for (let i = 0; i < dataPath.levels.length; i += 1) {
-        const newDataPath = dataPath.levels[i];
-        const newDataStr = dataStr + 'levels[' + i + '].';
+      for (let i = 0; i < category.levels.length; i += 1) {
+        const level = category.levels[i];
+        const levelStr = categoryStr + 'levels[' + i + '].';
 
         assert.equal(
-          typeof (newDataPath.negatives),
+          typeof (level.negatives),
           'string',
-          newDataStr + 'negatives is a string.',
+          levelStr + 'negatives is a string.',
         );
 
         assert.equal(
-          typeof (newDataPath.positives),
+          typeof (level.positives),
           'string',
-          newDataStr + 'positives is a string.',
+          levelStr + 'positives is a string.',
         );
 
         assert.ok(
-          newDataPath.positives !== '' || newDataPath.negatives !== '',
-          newDataStr + 'positives and ' + newDataStr + 'negatives can\'t be empty at the same time.',
+          level.positives !== '' || level.negatives !== '',
+          levelStr + 'positives and ' + levelStr + 'negatives can\'t be empty at the same time.',
         );
 
         assert.equal(
-          typeof (newDataPath.upTo),
+          typeof (level.upTo),
           'number',
-          newDataStr + 'upTo is a number.',
+          levelStr + 'upTo is a number.',
         );
 
-        let isSuperior = false;
-
-        // try {
-        if (previousUpTo < newDataPath.upTo) {
-          isSuperior = true;
-        }
-        previousUpTo = newDataPath.upTo;
-        assert.ok(isSuperior, newDataStr + 'upTo works, it only increases.');
-        // } catch (e) {
-        //   assert.ok(false, newDataStr + 'The previous upTo is superior than the current.')
-        // }
+        assert.ok((previousUpTo < level.upTo), levelStr + 'upTo only increases.');
+        previousUpTo = level.upTo;
 
         assert.ok(
-          newDataPath.upTo <= 100,
-          newDataStr + 'upTo is lower than 100.',
+          level.upTo <= 100,
+          levelStr + 'upTo is lower than 100.',
         );
       }
+
+      assert.equal(
+        category.levels[category.levels.length-1].upTo,
+        100,
+        categoryStr + 'level[' + (category.levels.length-1) + '].upTo is equal to 100',
+      );
     }
   },
 );
