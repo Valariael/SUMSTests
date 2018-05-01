@@ -1,0 +1,29 @@
+{
+  "name": "SUMS_public_api_tests",
+  "version": "1.0.0",
+  "description": "Tests for SUMS's public API.",
+  "scripts": {
+    "lint": "node_modules/.bin/eslint .",
+    "test": "node ./node_modules/qunit/bin/qunit publicApiTests.js"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Adrien Muck and Axel Ledermann",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.5.1",
+    "nodemon": "^1.12.1",
+    "nyc": "^11.7.1",
+    "qunit": "^2.6.0"
+  },
+  "dependencies": {
+    "express": "^4.16.2",
+    "multer": "^1.3.0",
+    "mysql2": "^1.5.1",
+    "node-fetch": "^2.1.2"
+  }
+}
