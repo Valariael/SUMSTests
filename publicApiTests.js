@@ -9,7 +9,7 @@ QUnit.module('Test of the data store');
 QUnit.test(
   'GET /api/public/1999PJE40/criteria',
   async (assert) => {
-    const url = 'https://sums.jacek.cz/api/public/1999PJE40/criteria';
+    const url = 'https://sums-dev.jacek.cz/api/public/1999PJE40';
     const response = await fetch(url);
     assert.ok(
       response.ok,
@@ -220,5 +220,68 @@ QUnit.test(
         categoryStr + 'level[' + (category.levels.length-1) + '].upTo is equal to 100',
       );
     }
+  },
+);
+
+QUnit.test(
+  'GET /api/1997PJE40/4/adrien@fake.example.org',
+  async (assert) => {
+    const url = 'https://sums-dev.jacek.cz/api/1997PJE40/4/adrien@fake.example.org';
+    let fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake adrien',
+      },
+    };
+    const response = await fetch(url, fetchOptions);
+
+    assert.ok(
+      response.ok,
+      'GET on /api/1997PJE40/4/adrien@fake.example.org is OK.',
+    );
+
+    const data = await response.json();
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      Authorization: 'Fake adrien',
+    };
+
+    assert.ok(
+      !data.plagiarismConcern,
+      'Cool it\'s on false',
+    );
+
+    data.plagiarismConcern = true;
+
+    fetch(url, fetchOptions);
+
+    assert.ok(
+      data.plagiarismConcern === true,
+      'Cool it\'s on true',
+    );
+  },
+);
+
+QUnit.test(
+  'Test of fake authentication',
+  async (assert) => {
+    const url = 'https://sums-dev.jacek.cz/api/ongoing-cohorts';
+    let response = await fetch(url);
+    assert.ok(
+      !response.ok,
+      'GET on /api/ongoing-cohort is not OK without auth.',
+    );
+
+    const fetchOptions = {
+      method: 'GET',
+      headers: { Authorization: 'Fake adrien' }, // headers: { Authorization: 'Fake drien' }  don't forget the bug with that !
+    };
+    response = await fetch(url, fetchOptions);
+    assert.ok(
+      response.ok,
+      'GET on /api/ongoing-cohort is OK with fake auth.',
+    );
   },
 );
