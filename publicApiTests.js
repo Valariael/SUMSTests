@@ -4,6 +4,25 @@
 
 const fetch = require('node-fetch');
 
+function createMarkingsFromData(data) {
+  const markings = {};
+
+  markings.adjustment = 0;
+  markings.generalComments = '';
+  markings.marks = [];
+  for (const category in data.project.cohort.markingForm.categories) { // eslint-disable-line guard-for-in
+    markings.marks['' + String(category.description)] = { value: null, note: '' };
+  }
+  markings.misconductConcern = false;
+  markings.plagiarismConcern = false;
+  markings.prizeJustification = '';
+  markings.prizeNominations = [];
+  markings.unfairnessComment = '';
+  markings.version = data.version;
+
+  return markings;
+}
+
 QUnit.module('Test of the data store');
 
 QUnit.test(
@@ -223,6 +242,8 @@ QUnit.test(
   },
 );
 
+QUnit.module('Test of the API');
+
 QUnit.test(
   'GET /api/1997PJE40/4/adrien@fake.example.org',
   async (assert) => {
@@ -233,20 +254,16 @@ QUnit.test(
         Authorization: 'Fake adrien',
       },
     };
-    const response = await fetch(url, fetchOptions);
+    let response = await fetch(url, fetchOptions);
 
     assert.ok(
       response.ok,
       'GET on /api/1997PJE40/4/adrien@fake.example.org is OK.',
     );
 
-    const data = await response.json();
+    // *******************************TEST plagiarismConcern SET TO true*****************
 
-    fetchOptions = {
-      method: 'POST',
-      body: JSON.stringify(data),
-      Authorization: 'Fake adrien',
-    };
+    let data = await response.json();
 
     assert.ok(
       !data.plagiarismConcern,
@@ -255,10 +272,28 @@ QUnit.test(
 
     data.plagiarismConcern = true;
 
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        Authorization: 'Fake adrien',
+      },
+    };
+
     fetch(url, fetchOptions);
 
+    fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake adrien',
+      },
+    };
+
+    response = await fetch(url, fetchOptions);
+    data = await response.json();
+
     assert.ok(
-      data.plagiarismConcern === true,
+      data.plagiarismConcern,
       'Cool it\'s on true',
     );
   },
@@ -283,5 +318,57 @@ QUnit.test(
       response.ok,
       'GET on /api/ongoing-cohort is OK with fake auth.',
     );
+  },
+);
+
+QUnit.test(
+  'Test of the version number',
+  async (assert) => {
+    const url = 'https://sums-dev.jacek.cz/api/1997PJS40/3/axel@fake.example.org';
+    let fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    let response = await fetch(url, fetchOptions);
+
+    assert.ok(
+      response.ok,
+      'GET on /api/1997PJS40/3/axel@fake.example.org is OK.',
+    );
+
+    let data = await response.json();
+    console.log(data.project.cohort);
+    let versionNumber = data.version;
+    console.log(versionNumber);
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      Authorization: 'Fake axel',
+    };
+    let returnVersion = await fetch(url, fetchOptions);
+
+    // ******************CONFLICT TEST******************
+    /* data.version -= 1;
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(data),
+      Authorization: 'Fake axel',
+    };
+    try {
+      response = null;
+      response = await fetch(url, fetchOptions);
+      console.log(await response);
+      assert.ok(false, 'There should be a Conflict exception.');
+    } catch (e) {
+      console.log(e);
+      assert.ok(true, 'Exception thrown.');
+    } */
+
+    // is there a way to guess what the new version number should be ? time function etc ?
+    // promise on return ???
   },
 );
