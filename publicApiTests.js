@@ -10,9 +10,12 @@ function createMarkingsFromData(data) {
 
   markings.adjustment = 0;
   markings.generalComments = '';
-  markings.marks = [];
-  for (let i=1; i<data.project.cohort.markingForm.categories.length; i+=1) {
-    markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { value: null, note: '' };
+  markings.marks = {};
+  console.log(data.project.cohort.markingForm.categories);
+  for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
+      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { value: null, note: '' };
+    }
   }
   markings.misconductConcern = false;
   markings.plagiarismConcern = false;
@@ -348,19 +351,17 @@ QUnit.test(
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(data),
-      Authorization: 'Fake axel',
+      body: JSON.stringify(createMarkingsFromData(data)),
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake axel',
+      },
     };
     response = await fetch(url, fetchOptions);
-    console.log('response : ');
+    console.log('response : \n++++++');
     console.log(response);
     console.log('response.text : ');
-    console.log(response.text);
-    console.log('response.json : ');
-    console.log(response.json());
-    let returnVersion = response.text;
-
-    console.log(returnVersion);
+    console.log(await response.text());
 
     // ******************CONFLICT TEST******************
     /* data.version -= 1;
