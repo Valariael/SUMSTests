@@ -1,5 +1,6 @@
 'use strict';
 
+
 /* global QUnit */
 
 const fetch = require('node-fetch');
@@ -10,8 +11,8 @@ function createMarkingsFromData(data) {
   markings.adjustment = 0;
   markings.generalComments = '';
   markings.marks = [];
-  for (const category in data.project.cohort.markingForm.categories) { // eslint-disable-line guard-for-in
-    markings.marks['' + String(category.description)] = { value: null, note: '' };
+  for (let i=1; i<data.project.cohort.markingForm.categories.length; i+=1) {
+    markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { value: null, note: '' };
   }
   markings.misconductConcern = false;
   markings.plagiarismConcern = false;
@@ -339,16 +340,27 @@ QUnit.test(
     );
 
     let data = await response.json();
+    console.log('cohort : ');
     console.log(data.project.cohort);
     let versionNumber = data.version;
-    console.log(versionNumber);
+    console.log('version : ' + versionNumber);
+    console.log(createMarkingsFromData(data));
 
     fetchOptions = {
       method: 'POST',
       body: JSON.stringify(data),
       Authorization: 'Fake axel',
     };
-    let returnVersion = await fetch(url, fetchOptions);
+    response = await fetch(url, fetchOptions);
+    console.log('response : ');
+    console.log(response);
+    console.log('response.text : ');
+    console.log(response.text);
+    console.log('response.json : ');
+    console.log(response.json());
+    let returnVersion = response.text;
+
+    console.log(returnVersion);
 
     // ******************CONFLICT TEST******************
     /* data.version -= 1;
