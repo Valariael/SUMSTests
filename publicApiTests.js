@@ -13,7 +13,7 @@ function createMarkingsFromData(data) {
   markings.marks = {};
   for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
     if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
-      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { value: null, note: '' };
+      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -348,6 +348,106 @@ QUnit.test(
 );
 
 QUnit.test(
+  'POST /api/1997PJE40/4/axel@fake.example.org',
+  async (assert) => {
+    const url = 'https://sums-dev.jacek.cz/api/1997PJS40/3/axel@fake.example.org';
+    let fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    let response = await fetch(url, fetchOptions);
+    let data = await response.json();
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(createMarkingsFromData(data)),
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake axel',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+
+    assert.ok(
+      response.ok,
+      'POST on /api/1997PJS40/3/axel@fake.example.org is OK.',
+    );
+
+    fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+    data = await response.json();
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(createMarkingsFromData(data)),
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+
+    assert.ok(
+      !response.ok,
+      'POST on /api/1997PJS40/3/axel@fake.example.org is not OK with wrong data.',
+    );
+
+    assert.equal(
+      response.status,
+      400,
+      'When sending a wrong version, status 400 returned.',
+    );
+
+    assert.equal(
+      response.statusText,
+      'Bad Request',
+      'The exception is `Bad Request`.',
+    );
+
+    fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+    data = await response.json();
+
+    fetchOptions = {
+      method: 'POST',
+      body: JSON.stringify(createMarkingsFromData(data)),
+      headers: {
+        Authorization: 'Fake jack',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+
+    assert.ok(
+      !response.ok,
+      'POST on /api/1997PJS40/3/axel@fake.example.org is not OK when using the wrong credentials.',
+    );
+
+    assert.equal(
+      response.status,
+      403,
+      'When sending a wrong version, status 403 returned.',
+    );
+
+    assert.equal(
+      response.statusText,
+      'Forbidden',
+      'The exception is `Forbidden`.',
+    );
+  },
+);
+
+QUnit.test(
   'Test of fake authentication',
   async (assert) => {
     const url = 'https://sums-dev.jacek.cz/api/ongoing-cohorts';
@@ -409,12 +509,6 @@ QUnit.test(
       },
     };
     response = await fetch(url, fetchOptions);
-
-    assert.ok(
-      response.ok,
-      'POST on /api/1997PJS40/3/axel@fake.example.org is OK.',
-    );
-
     const postReturn = await response.json();
 
     assert.ok(
