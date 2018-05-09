@@ -11,7 +11,6 @@ function createMarkingsFromData(data) {
   markings.adjustment = 0;
   markings.generalComments = '';
   markings.marks = {};
-  console.log(data.project.cohort.markingForm.categories);
   for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
     if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
       markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { value: null, note: '' };
@@ -252,53 +251,98 @@ QUnit.test(
   'GET /api/1997PJE40/4/adrien@fake.example.org',
   async (assert) => {
     const url = 'https://sums-dev.jacek.cz/api/1997PJE40/4/adrien@fake.example.org';
-    let fetchOptions = {
+    const fetchOptionsGET = {
       method: 'GET',
       headers: {
         Authorization: 'Fake adrien',
       },
     };
-    let response = await fetch(url, fetchOptions);
+
+    let response = await fetch(url, fetchOptionsGET);
 
     assert.ok(
       response.ok,
       'GET on /api/1997PJE40/4/adrien@fake.example.org is OK.',
     );
 
-    // *******************************TEST plagiarismConcern SET TO true*****************
+    /*
+    * Here we create the whole data with which we are going to compare the data
+    * received from the API.
+    */
 
-    let data = await response.json();
+    // First POST to get version number.
 
-    assert.ok(
-      !data.plagiarismConcern,
-      'Cool it\'s on false',
-    );
+    const data = await response.json();
+    const form = createMarkingsFromData(data);
 
-    data.plagiarismConcern = true;
-
-    fetchOptions = {
+    const fetchOptionsPOST = {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(form),
       headers: {
+        'Content-type': 'application/json',
         Authorization: 'Fake adrien',
       },
     };
 
-    fetch(url, fetchOptions);
+    const versionReturned = await fetch(url, fetchOptionsPOST);
+    const dataVersion = await versionReturned.json();
 
-    fetchOptions = {
-      method: 'GET',
-      headers: {
-        Authorization: 'Fake adrien',
-      },
+    // GET on https://sums-dev.jacek.cz/api/public/1997PJE40 to get cohort informations.
+
+    const urlCohort =  'https://sums-dev.jacek.cz/api/public/1997PJE40';
+
+    response = await fetch(urlCohort, fetchOptionsGET);
+
+    // Creating default marks.
+
+    const project = createMarkingsFromData(data);
+
+    project.role = 'supervisor';
+    project.email = 'adrien@fake.example.org';
+    project.name = 'Fake adrien';
+    project.version = dataVersion.version;
+    project.project = {
+      student: '4',
+      studentName: 'Pawlikowski, Andy',
+      title: 'fake-testing project',
     };
+    project.project.cohort = await response.json();
+    project.project.cohort.markingForm.prizes = [
+      {
+        id: 1,
+        name: 'Clever Touch Prize for the most Original Business Systems Project',
+      },
+      {
+        name: 'SoC Prize for Best Information Systems Project',
+        id: 2,
+      },
+      {
+        id: 4,
+        name: 'SoC David Callear Memorial Prize',
+      },
+      {
+        name: 'SoC Prize for Best Business Solution Project',
+        id: 5,
+      },
+      {
+        id: 7,
+        name: 'BAE Systems Project Prize in Software Engineering',
+      },
+      {
+        id: 10,
+        name: 'SoC Prize for best Computer Science project.',
+      },
+    ];
+    delete project.project.cohort.projectSubmissionDeadline;
 
-    response = await fetch(url, fetchOptions);
-    data = await response.json();
+    // End of creation.
 
-    assert.ok(
-      data.plagiarismConcern,
-      'Cool it\'s on true',
+    response = await fetch(url, fetchOptionsGET);
+
+    assert.deepEqual(
+      await response.json(),
+      project,
+      'The data received is correct.',
     );
   },
 );
@@ -311,6 +355,18 @@ QUnit.test(
     assert.ok(
       !response.ok,
       'GET on /api/ongoing-cohort is not OK without auth.',
+    );
+
+    assert.equal(
+      response.status,
+      401,
+      'When sending a wrong version, status 401 returned.',
+    );
+
+    assert.equal(
+      response.statusText,
+      'Unauthorized',
+      'The exception is `Unauthorized`.',
     );
 
     const fetchOptions = {
@@ -343,11 +399,6 @@ QUnit.test(
     );
 
     let data = await response.json();
-    console.log('cohort : ');
-    console.log(data.project.cohort);
-    let versionNumber = data.version;
-    console.log('version : ' + versionNumber);
-    console.log(createMarkingsFromData(data));
 
     fetchOptions = {
       method: 'POST',
@@ -358,30 +409,62 @@ QUnit.test(
       },
     };
     response = await fetch(url, fetchOptions);
-    console.log('response : \n++++++');
-    console.log(response);
-    console.log('response.text : ');
-    console.log(await response.text());
 
-    // ******************CONFLICT TEST******************
-    /* data.version -= 1;
+    assert.ok(
+      response.ok,
+      'POST on /api/1997PJS40/3/axel@fake.example.org is OK.',
+    );
+
+    const postReturn = await response.json();
+
+    assert.ok(
+      data.version < postReturn.version,
+      'The new version number is superior to the old version number.',
+    );
+
+    fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    response = await fetch(url, fetchOptions);
+    data = await response.json();
+
+    assert.equal(
+      data.version,
+      postReturn.version,
+      'The version number changed and is correct.',
+    );
+
+
+    data.version -= 1;
 
     fetchOptions = {
       method: 'POST',
       body: JSON.stringify(data),
-      Authorization: 'Fake axel',
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake axel',
+      },
     };
-    try {
-      response = null;
-      response = await fetch(url, fetchOptions);
-      console.log(await response);
-      assert.ok(false, 'There should be a Conflict exception.');
-    } catch (e) {
-      console.log(e);
-      assert.ok(true, 'Exception thrown.');
-    } */
+    response = await fetch(url, fetchOptions);
 
-    // is there a way to guess what the new version number should be ? time function etc ?
-    // promise on return ???
+    assert.ok(
+      !response.ok,
+      'POST on /api/1997PJS40/3/axel@fake.example.org is not OK with a wrong version number.',
+    );
+
+    assert.equal(
+      response.status,
+      409,
+      'When sending a wrong version, status 409 returned.',
+    );
+
+    assert.equal(
+      response.statusText,
+      'Conflict',
+      'The exception is a `Conflict`.',
+    );
   },
 );
