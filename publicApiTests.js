@@ -383,11 +383,14 @@ QUnit.test(
     };
     response = await fetch(url, fetchOptions);
     data = await response.json();
+    data = createMarkingsFromData(data);
+    data.role = 'wrong_role';
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(createMarkingsFromData(data)),
+      body: JSON.stringify(),
       headers: {
+        'Content-type': 'application/json',
         Authorization: 'Fake axel',
       },
     };
@@ -423,6 +426,7 @@ QUnit.test(
       method: 'POST',
       body: JSON.stringify(createMarkingsFromData(data)),
       headers: {
+        'Content-type': 'application/json',
         Authorization: 'Fake jack',
       },
     };
