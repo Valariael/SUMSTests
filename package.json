@@ -1,7 +1,7 @@
 {
-  "name": "SUMS_public_api_tests",
+  "name": "SUMS_api_tests",
   "version": "1.0.0",
-  "description": "Tests for SUMS's public API.",
+  "description": "Tests for SUMS's API.",
   "scripts": {
     "lint": "node_modules/.bin/eslint .",
     "test": "node ./node_modules/qunit/bin/qunit publicApiTests.js"
@@ -16,8 +16,8 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.5.1",
-    "nodemon": "^1.12.1",
-    "nyc": "^11.7.1",
+    "nodemon": "^1.17.4",
+    "nyc": "^11.7.3",
     "qunit": "^2.6.0"
   },
   "repository": "https://github.com/Valariael/SUMSPublicApiTests.git",
