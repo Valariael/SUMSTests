@@ -7,15 +7,19 @@ const gstd = require('./tools/generate-simple-test-data');
 
 console.log(gstd.cohorts);
 
-function createMarkingsFromData(data) {
+/*
+ *  createEmptyMarking creates the empty marking that is required to add a first mark,
+ *  it uses the parameters to create each marking category as if they were empty.
+ */
+function createEmptyMarking(markingForm, version) {
   const markings = {};
 
   markings.adjustment = 0;
   markings.generalComments = '';
   markings.marks = {};
-  for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
-      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { note: '' };
+  for (let i=0; i<markingForm.categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
+      markings.marks['' + String(markingForm.categories[i].name)] = { note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -23,21 +27,24 @@ function createMarkingsFromData(data) {
   markings.prizeJustification = '';
   markings.prizeNominations = [];
   markings.unfairnessComment = '';
-  markings.version = data.version;
+  markings.version = version;
 
   return markings;
 }
 
-function createMarkingsFromDataWithMarks(data, value) {
+/*
+ *  createMarkingsFinalized creates a finalized marking, it uses the parameters
+ *  to create each marking category with the same value `finalMark`.
+ */
+function createMarkingsFinalized(markingForm, version, finalMark) {
   const markings = {};
 
   markings.adjustment = 0;
-  markings.generalComments = '';
+  markings.generalComments = 'some comments '*50;
   markings.marks = {};
-  const categories = data.project.cohort.markingForm.categories;
-  for (let i=0; i<categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(categories[i], 'name')) {
-      markings.marks['' + String(categories[i].name)] = { mark: value, note: '' };
+  for (let i=0; i<markingForm.categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
+      markings.marks['' + String(markingForm.categories[i].name)] = { mark: finalMark, note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -45,8 +52,8 @@ function createMarkingsFromDataWithMarks(data, value) {
   markings.prizeJustification = '';
   markings.prizeNominations = [];
   markings.unfairnessComment = '';
-  markings.version = data.version;
-  markings.finalizedMark = value;
+  markings.version = version;
+  markings.finalizedMark = finalMark;
 
   return markings;
 }
@@ -101,7 +108,7 @@ QUnit.test(
 
     const data = await response.json();
 
-    const form = createMarkingsFromData(data);
+    const form = createEmptyMarking(data);
 
     const fetchOptionsPOST = {
       method: 'POST',
@@ -124,7 +131,7 @@ QUnit.test(
 
     // Creating default marks.
 
-    const project = createMarkingsFromData(data);
+    const project = createEmptyMarking(data);
 
     project.role = data.role;
     project.email = markerEmail;
