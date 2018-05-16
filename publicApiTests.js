@@ -5,6 +5,10 @@
 const fetch = require('node-fetch');
 const cp = require('child_process');
 
+/*
+ *  createEmptyMarking creates the empty marking that is required to add a first mark,
+ *  it uses the parameters to create each marking category as if they were empty.
+ */
 function createEmptyMarking(markingForm, version) {
   const markings = {};
 
@@ -26,6 +30,10 @@ function createEmptyMarking(markingForm, version) {
   return markings;
 }
 
+/*
+ *  createMarkingsFinalized creates a finalized marking, it uses the parameters
+ *  to create each marking category with the same value `finalMark`.
+ */
 function createMarkingsFinalized(markingForm, version, finalMark) {
   const markings = {};
 
