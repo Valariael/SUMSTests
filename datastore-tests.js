@@ -151,5 +151,8 @@ function checkCohortStructure(dbCohort) {
     if (category.levels[category.levels.length-1].upTo !== 100) {
       errors.push(categoryStr + 'level[' + (category.levels.length-1) + '].upTo should be 100');
     }
+
+    if (errors.length === 0) return false;
+    return errors;
   }
 }
