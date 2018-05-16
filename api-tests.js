@@ -3,6 +3,9 @@
 /* global QUnit */
 
 const fetch = require('node-fetch');
+const gstd = require('./tools/generate-simple-test-data');
+
+console.log(gstd.cohorts);
 
 function createMarkingsFromData(data) {
   const markings = {};
@@ -29,11 +32,12 @@ function createMarkingsFromDataWithMarks(data, value) {
   const markings = {};
 
   markings.adjustment = 0;
-  markings.generalComments = 'some comments '*150;
+  markings.generalComments = '';
   markings.marks = {};
-  for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
-      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { mark: value, note: '' };
+  const categories = data.project.cohort.markingForm.categories;
+  for (let i=0; i<categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(categories[i], 'name')) {
+      markings.marks['' + String(categories[i].name)] = { mark: value, note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -62,6 +66,7 @@ function reallyBigString() {
 
 QUnit.module('Testing the API');
 
+// We'll have to make a loop that goes through all the routes
 const cohort = '1997PJE40';
 const studentId = 1001;
 const markerEmail = 'axel@fake.example.org';

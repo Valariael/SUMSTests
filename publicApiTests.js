@@ -5,15 +5,15 @@
 const fetch = require('node-fetch');
 const cp = require('child_process');
 
-function createMarkingsFromData(data) {
+function createEmptyMarking(markingForm, version) {
   const markings = {};
 
   markings.adjustment = 0;
   markings.generalComments = '';
   markings.marks = {};
-  for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
-      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { note: '' };
+  for (let i=0; i<markingForm.categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
+      markings.marks['' + String(markingForm.categories[i].name)] = { note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -21,20 +21,20 @@ function createMarkingsFromData(data) {
   markings.prizeJustification = '';
   markings.prizeNominations = [];
   markings.unfairnessComment = '';
-  markings.version = data.version;
+  markings.version = version;
 
   return markings;
 }
 
-function createMarkingsFromDataWithMarks(data, value) {
+function createMarkingsFinalized(markingForm, version, finalMark) {
   const markings = {};
 
   markings.adjustment = 0;
   markings.generalComments = 'some comments '*50;
   markings.marks = {};
-  for (let i=0; i<data.project.cohort.markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(data.project.cohort.markingForm.categories[i], 'name')) {
-      markings.marks['' + String(data.project.cohort.markingForm.categories[i].name)] = { mark: value, note: '' };
+  for (let i=0; i<markingForm.categories.length; i+=1) {
+    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
+      markings.marks['' + String(markingForm.categories[i].name)] = { mark: finalMark, note: '' };
     }
   }
   markings.misconductConcern = false;
@@ -42,8 +42,8 @@ function createMarkingsFromDataWithMarks(data, value) {
   markings.prizeJustification = '';
   markings.prizeNominations = [];
   markings.unfairnessComment = '';
-  markings.version = data.version;
-  markings.finalizedMark = value;
+  markings.version = version;
+  markings.finalizedMark = finalMark;
 
   return markings;
 }
@@ -53,10 +53,10 @@ function reallyBigString() {
 
   do {
     str += '.';
-    if (str.length % 1000 === 0) {
-      str += '1000';
+    if (str.length % 100 === 0) {
+      str += '100';
     }
-  } while (str.length < 15000);
+  } while (str.length <= 1500);
 
   return str;
 }
@@ -284,10 +284,12 @@ QUnit.test(
 
 QUnit.module('Testing the API');
 
+const localhost = 'http://127.0.0.1:8080/';
+
 QUnit.test(
   'GET /api/1997PJE40/4/adrien@fake.example.org',
   async (assert) => {
-    const url = 'https://sums-dev.jacek.cz/api/1997PJE40/4/adrien@fake.example.org';
+    const url = localhost + 'api/1997PJE40/4/adrien@fake.example.org';
     const fetchOptionsGET = {
       method: 'GET',
       headers: {
@@ -310,11 +312,14 @@ QUnit.test(
     // First POST to get version number.
 
     const data = await response.json();
-    const form = createMarkingsFromData(data);
+
+    // Creating default marks.
+
+    const marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
 
     const fetchOptionsPOST = {
       method: 'POST',
-      body: JSON.stringify(form),
+      body: JSON.stringify(marking),
       headers: {
         'Content-type': 'application/json',
         Authorization: 'Fake adrien',
@@ -326,25 +331,22 @@ QUnit.test(
 
     // GET on https://sums-dev.jacek.cz/api/public/1997PJE40 to get cohort informations.
 
-    const urlCohort =  'https://sums-dev.jacek.cz/api/public/1997PJE40';
-
+    const urlCohort =  localhost + 'api/public/1997PJE40';
     response = await fetch(urlCohort, fetchOptionsGET);
 
-    // Creating default marks.
+    // Adding all the data to the marking.
 
-    const project = createMarkingsFromData(data);
-
-    project.role = 'supervisor';
-    project.email = 'adrien@fake.example.org';
-    project.name = 'Fake adrien';
-    project.version = dataVersion.version;
-    project.project = {
+    marking.role = 'supervisor';
+    marking.email = 'adrien@fake.example.org';
+    marking.name = 'Fake adrien';
+    marking.version = dataVersion.version;
+    marking.project = {
       student: '4',
       studentName: 'Pawlikowski, Andy',
       title: 'fake-testing project',
     };
-    project.project.cohort = await response.json();
-    project.project.cohort.markingForm.prizes = [
+    marking.project.cohort = await response.json();
+    marking.project.cohort.markingForm.prizes = [
       {
         id: 1,
         name: 'Clever Touch Prize for the most Original Business Systems Project',
@@ -370,15 +372,16 @@ QUnit.test(
         name: 'SoC Prize for best Computer Science project.',
       },
     ];
-    delete project.project.cohort.projectSubmissionDeadline;
+    delete marking.project.cohort.projectSubmissionDeadline;
 
     // End of creation.
 
     response = await fetch(url, fetchOptionsGET);
+    const dataToCompare = await response.json();
 
     assert.deepEqual(
-      await response.json(),
-      project,
+      dataToCompare,
+      marking,
       'The data received is correct.',
     );
   },
@@ -387,7 +390,7 @@ QUnit.test(
 QUnit.test(
   'POST /api/1997PJE40/4/axel@fake.example.org',
   async (assert) => {
-    const url = 'https://sums-dev.jacek.cz/api/1997PJS40/3/axel@fake.example.org';
+    const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
     let fetchOptions = {
       method: 'GET',
       headers: {
@@ -399,7 +402,7 @@ QUnit.test(
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(createMarkingsFromData(data)),
+      body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
       headers: {
         'Content-type': 'application/json',
         Authorization: 'Fake axel',
@@ -412,7 +415,7 @@ QUnit.test(
       'POST on /api/1997PJS40/3/axel@fake.example.org is OK.',
     );
 
-    fetchOptions = {
+    /* fetchOptions = {
       method: 'GET',
       headers: {
         Authorization: 'Fake axel',
@@ -420,8 +423,8 @@ QUnit.test(
     };
     response = await fetch(url, fetchOptions);
     data = await response.json();
-    data = createMarkingsFromData(data);
-    data.role = 'wrong_role';
+    let marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
+    marking.role = 'wrong_role'; */
 
     fetchOptions = {
       method: 'POST',
@@ -441,7 +444,7 @@ QUnit.test(
     assert.equal(
       response.status,
       400,
-      'When sending a wrong version, status 400 returned.',
+      'When sending incorrect data, status 400 returned.',
     );
 
     assert.equal(
@@ -461,7 +464,7 @@ QUnit.test(
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(createMarkingsFromData(data)),
+      body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
       headers: {
         'Content-type': 'application/json',
         Authorization: 'Fake jack',
@@ -477,7 +480,7 @@ QUnit.test(
     assert.equal(
       response.status,
       403,
-      'When sending a wrong version, status 403 returned.',
+      'When using wrong credentials, status 403 returned.',
     );
 
     assert.equal(
@@ -494,8 +497,8 @@ QUnit.test(
     };
     response = await fetch(url, fetchOptions);
     data = await response.json();
-    data = createMarkingsFromData(data);
-    data.marks.Content.note = reallyBigString();
+    const marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
+    marking.generalComments = reallyBigString();
 
     fetchOptions = {
       method: 'POST',
@@ -517,7 +520,7 @@ QUnit.test(
 QUnit.test(
   'Test of fake authentication',
   async (assert) => {
-    const url = 'https://sums-dev.jacek.cz/api/ongoing-cohorts';
+    const url = localhost + 'api/ongoing-cohorts';
     let response = await fetch(url);
 
     assert.ok(
@@ -528,7 +531,7 @@ QUnit.test(
     assert.equal(
       response.status,
       401,
-      'When sending a wrong version, status 401 returned.',
+      'When sending a wrong authentication token, status 401 returned.',
     );
 
     assert.equal(
@@ -553,7 +556,7 @@ QUnit.test(
 QUnit.test(
   'Test of the version number',
   async (assert) => {
-    const url = 'https://sums-dev.jacek.cz/api/1997PJS40/3/axel@fake.example.org';
+    const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
     let fetchOptions = {
       method: 'GET',
       headers: {
@@ -571,7 +574,7 @@ QUnit.test(
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(createMarkingsFromData(data)),
+      body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
       headers: {
         'Content-type': 'application/json',
         Authorization: 'Fake axel',
@@ -600,12 +603,11 @@ QUnit.test(
       'The version number changed and is correct.',
     );
 
-
     data.version -= 1;
 
     fetchOptions = {
       method: 'POST',
-      body: JSON.stringify(createMarkingsFromData(data)),
+      body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
       headers: {
         'Content-type': 'application/json',
         Authorization: 'Fake axel',
@@ -632,6 +634,8 @@ QUnit.test(
   },
 );
 
+// The test below has to be rewritten entirely
+/*
 QUnit.test(
   'GET /api/ongoing-cohorts',
   async (assert) => {
@@ -946,18 +950,19 @@ QUnit.test(
 
     // Execute the shell command to restore datas.
 
-    const command = cp.spawn('node', ['tests/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2']); // eslint-disable-line max-len
+    // const command = cp.spawn('node', ['toools/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2']); // eslint-disable-line max-len
 
-    // Uncomment the following function to see what do the command.
-    /*
+// Uncomment the following function to see what do the command.
+/*
     command.stdout.on('data', (data) => {
       console.log('Message: ' + data);
     });
     */
-
+/*
     console.log('Restoration of datas.');
     command.on('close', () => {
       console.log('Restoration of datas complete.');
     });
   },
 );
+*/
