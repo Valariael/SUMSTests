@@ -1,7 +1,5 @@
 'use strict';
 
-/* eslint-disable */
-
 // We should do a loop that goes through all the entities
 // Before entering the function, check that the url matches (see splitURL)
 
@@ -42,7 +40,7 @@ function checkCohortStructure(dbCohort) {
     errors.push(typeErr + 'id is not a string');
   }
   if (dbCohort.id !== dbCohort.cohortId + '/' + dbCohort.student) {
-    errors.psuh('the id should be equal to `:cohortId/:student`')
+    errors.psuh('the id should be equal to `:cohortId/:student`');
   }
 
   if (!(typeof (dbCohort.year) === 'number')) {
@@ -143,7 +141,7 @@ function checkCohortStructure(dbCohort) {
         errors.push(typeErr + levelStr + 'positives is not a string');
       }
 
-      if ((level.positives === '' || level.positives.length === 0) && (level.negatives === '' || level.negatives.length === 0)) {
+      if ((level.positives === '' || level.positives.length === 0) && (level.negatives === '' || level.negatives.length === 0)) { // eslint-disable-line max-len
         errors.push(levelStr + 'positives and ' + levelStr + 'negatives are empty at the same time');
       }
 
@@ -216,7 +214,7 @@ function checkProjectStructure(dbProject) {
     errors.push(typeErr + 'id is not a string');
   }
   if (dbProject.id !== dbProject.cohortId + '/' + dbProject.student) {
-    errors.push('the id should be equal to `:cohortId/:student`')
+    errors.push('the id should be equal to `:cohortId/:student`');
   }
 
   if (!(typeof (dbProject.student) === 'number')) {
@@ -253,7 +251,7 @@ function checkProjectStructure(dbProject) {
             errors.push('feedbackSent should be false');
           }
         }
-      } else if (typeof (dbProject.finalMark) == 'number') {
+      } else if (typeof (dbProject.finalMark) === 'number') {
         if (dbProject.finalMark < 0 || dbProject.finalMark > 100) {
           errors.push('project marked : finalMark should be in [0-100]');
         } else {
@@ -326,21 +324,20 @@ function checkProjectStructure(dbProject) {
 
   if (!(typeof (dbProject.feedbackSent) === 'boolean')) {
     errors.push(typeErr + 'finalMark is not a boolean');
+  }
+  if (dbProject.feedbackSent) {
+    if (!((typeof dbProject.feedbackForStudent) === 'string')) {
+      errors.push(typeErr + 'feedbackForStudent is not a string');
+    }
+    if (dbProject.feedbackForStudent.length < 100) {
+      errors.push('feedbackForStudent should be at least 100 characters');
+    }
   } else {
-    if (dbProject.feedbackSent) {
-      if (!((typeof dbProject.feedbackForStudent) === 'string')) {
-        errors.push(typeErr + 'feedbackForStudent is not a string');
-      }
-      if (dbProject.feedbackForStudent.length < 100) {
-        errors.push('feedbackForStudent should be at least 100 characters');
-      }
-    } else {
-      if (!((typeof dbProject.feedbackForStudent) === 'object')) {
-        errors.push(typeErr + 'feedbackForStudent is not a object');
-      }
-      if (dbProject.feedbackForStudent.length !== null) {
-        errors.push('feedbackForStudent should be null');
-      }
+    if (!((typeof dbProject.feedbackForStudent) === 'object')) {
+      errors.push(typeErr + 'feedbackForStudent is not a object');
+    }
+    if (dbProject.feedbackForStudent.length !== null) {
+      errors.push('feedbackForStudent should be null');
     }
   }
 
@@ -350,8 +347,8 @@ function checkProjectStructure(dbProject) {
   if (!(dbProject.markers.length > 1)) {
     errors.push('not enough markers');
   }
-  for (let i = 0; i < dbCohort.markers.length; i += 1) {
-    if (!(typeof (dbCohort.markers[i]) === 'string')) {
+  for (let i = 0; i < dbProject.markers.length; i += 1) {
+    if (!(typeof (dbProject.markers[i]) === 'string')) {
       errors.push(typeErr + 'markers[' + i + '] is not a string');
     }
     if (!(dbProject.markers[i].length > 0)) {
@@ -368,3 +365,7 @@ function checkProjectStructure(dbProject) {
     }
   }
 }
+
+// const attrAbs = 'attribute absent : ';
+// const typeErr = 'incorrect attribute type : ';
+// const empty = 'should not be empty : ';
