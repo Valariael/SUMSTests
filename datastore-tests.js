@@ -1,5 +1,6 @@
 'use strict';
 
+
 // We should do a loop that goes through all the entities
 // Before entering the function, check that the url matches (see splitURL)
 
@@ -7,30 +8,30 @@ const attrAbs = 'attribute absent : ';
 const typeErr = 'incorrect attribute type : ';
 const empty = 'should not be empty : ';
 
+/*
+ * Each one of the functions below tests for one of de four _root entities_ if it is structurally correct.
+ * It takes the `root entity` as an object in parameter.
+ * The output is false if there is no error, an array of strings describing the errors otherwise.
+ */
+
+// COHORT ENTITY
 function checkCohortStructure(dbCohort) {
   const errors = [];
   const dateRegexp = new RegExp(/^\d{4}[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])$/);
+  const attributes = [
+    'id',
+    'year',
+    'closed',
+    'coordinators',
+    'projectSubmissionDeadline',
+    'unit',
+    'markingForm',
+  ];
 
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'id')) {
-    errors.push(attrAbs + 'id');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'year')) {
-    errors.push(attrAbs + 'year');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'closed')) {
-    errors.push(attrAbs + 'closed');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'coordinators')) {
-    errors.push(attrAbs + 'coordinators');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'projectSubmissionDeadline')) {
-    errors.push(attrAbs + 'projectSubmissionDeadline');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'unit')) {
-    errors.push(attrAbs + 'unit');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbCohort, 'markingForm')) {
-    errors.push(attrAbs + 'markingForm');
+  for (let i=0; i<attributes.length; i+=1) {
+    if (!Object.prototype.hasOwnProperty.call(dbCohort, attributes[i])) {
+      errors.push(attrAbs + attributes[i]);
+    }
   }
   if (!Object.prototype.hasOwnProperty.call(dbCohort.markingForm, 'categories')) {
     errors.push(attrAbs + 'markingForm.categories');
@@ -167,47 +168,29 @@ function checkCohortStructure(dbCohort) {
   return errors;
 }
 
+// PROJECT ENTITY
 function checkProjectStructure(dbProject) {
   const errors = [];
+  const attributes = [
+    'id',
+    'student',
+    'cohortId',
+    'title',
+    'submitted',
+    'finalMark',
+    'markers',
+    'markOverrideComments',
+    'unfairnessConcern',
+    'unfairnessComment',
+    'feedbackForStudent',
+    'feedbackSent',
+    'requestAdditionalMarker',
+  ];
 
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'id')) {
-    errors.push(attrAbs + 'id');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'student')) {
-    errors.push(attrAbs + 'student');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'cohortId')) {
-    errors.push(attrAbs + 'cohortId');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'title')) {
-    errors.push(attrAbs + 'title');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'submitted')) {
-    errors.push(attrAbs + 'submitted');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'finalMark')) {
-    errors.push(attrAbs + 'finalMark');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'markers')) {
-    errors.push(attrAbs + 'markers');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'markOverrideComments')) {
-    errors.push(attrAbs + 'markOverrideComments');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'unfairnessConcern')) {
-    errors.push(attrAbs + 'unfairnessConcern');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'unfairnessComment')) {
-    errors.push(attrAbs + 'unfairnessComment');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'feedbackForStudent')) {
-    errors.push(attrAbs + 'feedbackForStudent');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'feedbackSent')) {
-    errors.push(attrAbs + 'feedbackSent');
-  }
-  if (!Object.prototype.hasOwnProperty.call(dbProject, 'requestAdditionalMarker')) {
-    errors.push(attrAbs + 'requestAdditionalMarker');
+  for (let i=0; i<attributes.length; i+=1) {
+    if (!Object.prototype.hasOwnProperty.call(dbProject, attributes[i])) {
+      errors.push(attrAbs + attributes[i]);
+    }
   }
 
   if (!(typeof (dbProject.id) === 'string')) {
@@ -364,8 +347,122 @@ function checkProjectStructure(dbProject) {
       errors.push('requestAdditionalMarker should be true');
     }
   }
+
+  if (errors.length === 0) return false;
+  return errors;
 }
 
-// const attrAbs = 'attribute absent : ';
-// const typeErr = 'incorrect attribute type : ';
-// const empty = 'should not be empty : ';
+// STUDENT ENTITY
+function checkStudentStructure(dbStudent) {
+  const errors = [];
+  const idRegexp = new RegExp(/^\d{6}$/);
+  const attributes = ['id', 'email', 'name', 'preferences', 'lastActivity'];
+
+  for (let i=0; i<attributes.length; i+=1) {
+    if (!Object.prototype.hasOwnProperty.call(dbStudent, attributes[i])) {
+      errors.push(attrAbs + attributes[i]);
+    }
+  }
+
+  if (!(typeof (dbStudent.id) === 'string')) {
+    errors.push(typeErr + 'id is not a string');
+  }
+  if (dbStudent.id.length !== 6) {
+    errors.push('id should be 6 characters long');
+  }
+  if (!(idRegexp.test(dbStudent.id))) {
+    errors.push('id has an incorrect format');
+  }
+
+  if (!(typeof (dbStudent.email) === 'string')) {
+    errors.push(typeErr + 'email is not a string');
+  }
+  if (!(dbStudent.email.length > 0)) {
+    errors.push(empty + 'email');
+  }
+
+  if (!(typeof (dbStudent.name) === 'string')) {
+    errors.push(typeErr + 'name is not a string');
+  }
+  if (!(dbStudent.name.length > 0)) {
+    errors.push(empty + 'name');
+  }
+
+  if (!(typeof (dbStudent.preferences) === 'object')) {
+    errors.push(typeErr + 'preferences is not an object');
+  }// precisions needed, are the attributes defined ?????
+
+  if (!(typeof (dbStudent.lastActivity) === 'number')) {
+    errors.push(typeErr + 'lastActivity is not a string');
+  }// undefined possible ?
+
+  if (errors.length === 0) return false;
+  return errors;
+}
+
+// STAFF ENTITY
+function chechStaffStructure(dbStaff) {
+  const errors = [];
+  const attributes = ['email', 'name', 'canCreateCohortsInUnits', 'roles', 'preferences', 'lastActivity'];
+
+  for (let i=0; i<attributes.length; i+=1) {
+    if (!Object.prototype.hasOwnProperty.call(dbStaff, attributes[i])) {
+      errors.push(attrAbs + attributes[i]);
+    }
+  }
+
+  if (!(typeof (dbStaff.email) === 'string')) {
+    errors.push(typeErr + 'email is not a string');
+  }
+  if (!(dbStaff.email.length > 0)) {
+    errors.push(empty + 'email');
+  }
+
+  if (!(typeof (dbStaff.name) === 'string')) {
+    errors.push(typeErr + 'name is not a string');
+  }
+  if (!(dbStaff.name.length > 0)) {
+    errors.push(empty + 'name');
+  }
+
+  if (!(Array.isArray(dbStaff.canCreateCohortsInUnits))) {
+    errors.push(typeErr + 'canCreateCohortsInUnits is not an array');
+  }
+  if (!(dbStaff.canCreateCohortsInUnits.length > 1)) {
+    errors.push('not enough canCreateCohortsInUnits');
+  }
+  for (let i = 0; i < dbStaff.canCreateCohortsInUnits.length; i += 1) {
+    if (!(typeof (dbStaff.canCreateCohortsInUnits[i]) === 'string')) {
+      errors.push(typeErr + 'canCreateCohortsInUnits[' + i + '] is not a string');
+    }
+    if (!(dbStaff.canCreateCohortsInUnits[i].length > 0)) {
+      errors.push(empty + 'canCreateCohortsInUnits[' + i + ']');
+    }
+  }
+
+  if (!(Array.isArray(dbStaff.roles))) {
+    errors.push(typeErr + 'roles is not an array');
+  }
+  if (!(dbStaff.roles.length > 1)) {
+    errors.push('not enough roles');
+  }
+  for (let i = 0; i < dbStaff.roles.length; i += 1) {
+    if (!(typeof (dbStaff.roles[i]) === 'string')) {
+      errors.push(typeErr + 'roles[' + i + '] is not a string');
+    }
+    if (!(dbStaff.roles[i].length > 0)) {
+      errors.push(empty + 'roles[' + i + ']');
+    }
+  }
+
+  if (!(typeof (dbStaff.preferences) === 'object')) {
+    errors.push(typeErr + 'preferences is not an object');
+  }// precisions needed, are the attributes defined ?????
+
+  if (!(typeof (dbStaff.lastActivity) === 'number')) {
+    errors.push(typeErr + 'lastActivity is not a string');
+  }// undefined possible ?
+
+  if (errors.length === 0) return false;
+  return errors;
+}
