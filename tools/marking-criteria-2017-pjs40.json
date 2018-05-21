@@ -1,0 +1,389 @@
+[
+ {
+  "name": "Statement of project’s context, aims and objectives",
+  "description": "To what extent are the research topic and investigation well framed in the report? How challenging is the research demonstrated to be?",
+  "compulsory": false,
+  "weight": 2,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "No statement or very generalised with vague aims or objectives. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Research area outlined but insufficiently clear aims and objectives."
+   },
+   {
+    "upTo": 49,
+    "positives": "Research topic and aims and objectives apparent.",
+    "negatives": "But shows limited understanding and analysis."
+   },
+   {
+    "upTo": 59,
+    "positives": "Research topic and aims and objectives reasonably presented, showing some understanding and analysis. Key aspects of the context are covered.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Research topic and aims and objectives well presented\/framed and placed in the wider context.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Research is shown to be challenging OR shows some originality and confidence in criticising assumptions.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Research is shown to be challenging AND shows originality and confidence in criticising assumptions.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Critical review of relevant literature",
+  "description": "How critical, relevant, comprehensive and current is the review? Are the sources demonstrated to be credible (or not)? Does the review incorporate all the relevant literature? Is irrelevant material left out? References correctly cited, bibliography included.",
+  "compulsory": false,
+  "weight": 3,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "Zero or a few sources mentioned, but not reviewed. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Superficial review, misunderstanding the subject."
+   },
+   {
+    "upTo": 49,
+    "positives": "Some research using texts, Internet and key reference sources with reference citation and presentation according to convention.",
+    "negatives": "Limited understanding and analysis."
+   },
+   {
+    "upTo": 59,
+    "positives": "Research uses primary sources.  Appropriately cited and presented references.  Shows some understanding and analysis.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Well researched and presented.  Demonstrates understanding and topic viewed in wider context.  Uses credible, current material. Some good critique.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Evidence of extensive research and a well-framed search strategy.  Demonstrates understanding of complex subject matter and viewed it in a wider context.  Shows some originality of thought with good critique.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "A very well framed search strategy apparent. Shows substantive originality and confidence in criticising assumptions.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Methodological approach",
+  "description": "To what extent does the report show that the approach used was appropriate and justified and well applied where primary research has been conducted? How well does the report describe and justify appropriate methodological tools\/techniques deployed or considered for deployment?",
+  "compulsory": false,
+  "weight": 2,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "Little\/no evidence of choice or use of method. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Poor choice of methodology and life cycle, or little\/no evidence of use."
+   },
+   {
+    "upTo": 49,
+    "positives": "Methodology described.  Some evidence of use.",
+    "negatives": ""
+   },
+   {
+    "upTo": 59,
+    "positives": "Appropriate methodology used.  Some justification for use.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Credible justification for use. Methodology well described and applied. Some limitations of the methodology are discussed.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Very good methodological awareness. Insightful critique of the methods used included.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Outstanding methodological awareness demonstrated and outstanding critique of the methods used included.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Primary research & results",
+  "description": "(Normally, Study projects will include primary research) How well designed and conducted was any primary research? How well evaluated and interpreted were the results?",
+  "compulsory": false,
+  "weight": 3,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "Need for research apparent, but none carried out. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Research is poorly carried out with a substantially flawed method, or little or no reliable data obtained."
+   },
+   {
+    "upTo": 49,
+    "positives": "Some evidence of primary research but little use made of data.",
+    "negatives": ""
+   },
+   {
+    "upTo": 59,
+    "positives": "Fairly well carried out but limited scope with some data obtained.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Research was well designed and well conducted. Evaluation and interpretation relevant and puts work in wider context.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Research was very well designed and very well conducted. Good methodological awareness demonstrated and good critique of methods used included.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Research excellently designed and carried out.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Content",
+  "description": "How comprehensive, appropriate and focussed is the content of the report? To what extent does the report present analysis rather than description? To what extent does the report  contain: elements of originality,  innovative approaches to, or even new insights on the topic?",
+  "compulsory": false,
+  "weight": 3,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "Content is neither comprehensive, appropriate or focussed. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Some descriptive content but no analysis."
+   },
+   {
+    "upTo": 49,
+    "positives": "",
+    "negatives": "Content is largely descriptive with little analysis."
+   },
+   {
+    "upTo": 59,
+    "positives": "Shows understanding and analysis of the key aspects of the topic.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Shows some originality of thought with some good critique, insight and analysis.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Shows substantive elements of originality, insight and confidence in analysing and criticising assumptions.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Demonstrates a cogent awareness of the limits of knowledge. Highly original and includes elements of new insight into the subject area.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Evidence of project planning and management",
+  "description": "How well does the report demonstrate the preparation of an overall project plan with time-scales, resources, and a work schedule? How well does the report show evidence that it has been followed and explain deviations from it?",
+  "compulsory": false,
+  "weight": 1,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "No planning evident. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Sketchy generalised plan with no other evidence of project planning or monitoring of progress."
+   },
+   {
+    "upTo": 49,
+    "positives": "Project plan with some indication that it has been followed.",
+    "negatives": ""
+   },
+   {
+    "upTo": 59,
+    "positives": "Some detail in plan. Some evidence that it has been followed (at least a little discussion of progress against plan).",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Shows a detailed plan with timescales, resources and a work schedule for most tasks.  Some evaluation\/discussion of progress against plan.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Demonstrates understanding of issues that affected the project and how they could have been avoided.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Outstanding awareness of the importance of project planning and management evidenced.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Summary, conclusions and recommendations",
+  "description": "(if appropriate) To what extent are the conclusions appropriate, original and supported by the report? How well are the outcomes of the project summarised? Are the conclusions based on analysis and understanding? Where recommendations are made, are they justified by the report’s content?",
+  "compulsory": false,
+  "weight": 2,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "No serious attempt made to address the question or problem and\/or shows a serious misunderstanding of the requirements of the task. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Work attempts to address the question\/problem but is substantially incomplete and deficient."
+   },
+   {
+    "upTo": 49,
+    "positives": "",
+    "negatives": "Some limited summary or statement of conclusions, but not well focused upon the question\/problem being addressed."
+   },
+   {
+    "upTo": 59,
+    "positives": "Fairly well summarised.  Conclusions\/recommendations mostly valid and related at least partially to the objectives.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Conclusions\/recommendations all valid and relate well to the objectives\/research questions.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Conclusions very appropriate and well supported by the report as a whole. Demonstrates very good understanding of complex subject matter.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Outstanding in all summative aspects.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Structure and presentation",
+  "description": "How well presented is the report in terms of quality of prose style; page layout; appropriate division into chapters, sections and sub-sections; use of graphics and tables; punctuation, spelling, grammar and syntax; fluency and readability?",
+  "compulsory": false,
+  "weight": 2,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "Acutely deficient in all aspects. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "Serious problems with a number of aspects of language use are often found in work in this range."
+   },
+   {
+    "upTo": 49,
+    "positives": "An attempt to follow directions regarding organisation, structure, use and flow of language, grammar, spelling, format, diagrams, tables etc.",
+    "negatives": ""
+   },
+   {
+    "upTo": 59,
+    "positives": "Satisfactory presentation with respect to organisation, language, grammar, spelling, format, presentation, diagrams, tables etc.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Very good in terms of organisation, structure, use and flow of language, grammar, spelling, format, presentation, diagrams, tables etc.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Excellent in terms of organisation, structure, use and flow of language, grammar, spelling, format, presentation, diagrams, tables etc.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Outstanding in all aspects of presentation.",
+    "negatives": ""
+   }
+  ]
+ },
+ {
+  "name": "Overall understanding and reflection",
+  "description": "Does the report show clearly and explicitly that the student has understood the material presented and the techniques used? Does the student demonstrate appreciation of the strengths and weaknesses of the approach(es) used? Does the student show the ability to analyse and to reflect critically on the material?",
+  "compulsory": false,
+  "weight": 3,
+  "levels": [
+   {
+    "upTo": 29,
+    "positives": "",
+    "negatives": "FAIL. No serious attempt to address the question or problem, and\/or manifests a serious misunderstanding of the requirements of the assignment. Acutely deficient in all aspects. 20-29 indicates a superficial, cursory or casual approach. 10-19 indicates an unintelligible, meaningless or indecipherable report. 1-9 indicates little or no evidence of any work being done. 0 is reserved for non-submission."
+   },
+   {
+    "upTo": 39,
+    "positives": "",
+    "negatives": "FAIL. Anything, which is inadequate in most or all of the following: length, content, structure, analysis, expression, argument, relevance, research and presentation. Work in this range attempts to address the question\/problem but is substantially incomplete and deficient."
+   },
+   {
+    "upTo": 49,
+    "positives": "Adequate work which attempts to address the topic with limited understanding and analysis.",
+    "negatives": ""
+   },
+   {
+    "upTo": 59,
+    "positives": "Work that attempts to address the topic with some understanding and analysis, key aspects of the subject matter covered.  The majority of students might normally be expected to fall within this range.",
+    "negatives": ""
+   },
+   {
+    "upTo": 69,
+    "positives": "Good work – contains most of the information required, is accurate and relevant and demonstrates understanding of the subject matter and attempts to view it in a wider context. Shows some originality of thought with good critique and analysis of assumptions, is aware of the limits of knowledge.",
+    "negatives": ""
+   },
+   {
+    "upTo": 79,
+    "positives": "Contains accurate, relevant material, demonstrates understanding of complex subject matter and is able to view it in a wider context.  Shows originality and confidence in analysing and criticising assumptions.",
+    "negatives": ""
+   },
+   {
+    "upTo": 100,
+    "positives": "Demonstrates a cogent awareness of the limits of knowledge. Outstanding level of understanding and reflection demonstrated.",
+    "negatives": ""
+   }
+  ]
+ }
+]

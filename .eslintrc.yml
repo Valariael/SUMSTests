@@ -1,4 +1,6 @@
-extends: airbnb
+extends:
+  - airbnb
+  - plugin:jest/recommended
 
 env:
   node: true

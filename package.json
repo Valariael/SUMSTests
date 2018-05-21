@@ -4,7 +4,7 @@
   "description": "Tests for SUMS's API.",
   "scripts": {
     "lint": "node_modules/.bin/eslint .",
-    "test": "node ./node_modules/qunit/bin/qunit publicApiTests.js"
+    "test": "jest"
   },
   "keywords": [
     "node"
@@ -16,9 +16,10 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-jest": "^21.15.1",
     "nodemon": "^1.17.4",
     "nyc": "^11.7.3",
-    "qunit": "^2.6.0"
+    "jest": "^22.4.3"
   },
   "repository": "https://github.com/Valariael/SUMSPublicApiTests.git",
   "dependencies": {
