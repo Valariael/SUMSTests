@@ -69,6 +69,14 @@ function reallyBigString() {
   return str;
 }
 
+function wait(ms) {
+  const start = new Date().getTime();
+  let end = start;
+  while (end < start + ms) {
+    end = new Date().getTime();
+  }
+}
+
 QUnit.module('Testing the API');
 
 const localhost = 'http://127.0.0.1:8080/';
@@ -421,166 +429,37 @@ QUnit.test(
   },
 );
 
-// The test below has to be rewritten entirely
-/*
-QUnit.test(
-  'GET /api/ongoing-cohorts',
-  async (assert) => {
-    // Marking a project on both side for testing purpose
-
-    let url = 'https://sums-dev.jacek.cz/api/1997PJE40/2/axel@fake.example.org';
-    let fetchOptions = {
-      method: 'GET',
-      headers: {
-        Authorization: 'Fake axel',
-      },
-    };
-    let response = await fetch(url, fetchOptions);
-    let data = await response.json();
-
-    fetchOptions = {
-      method: 'POST',
-      body: JSON.stringify(createMarkingsFromDataWithMarks(data, 50)),
-      headers: {
-        'Content-type': 'application/json',
-        Authorization: 'Fake axel',
-      },
-    };
-    await fetch(url, fetchOptions);
-
-    url = 'https://sums-dev.jacek.cz/api/1997PJE40/2/jack@fake.example.org';
-    fetchOptions = {
-      method: 'GET',
-      headers: {
-        Authorization: 'Fake jack',
-      },
-    };
-    response = await fetch(url, fetchOptions);
-    data = await response.json();
-
-    fetchOptions = {
-      method: 'POST',
-      body: JSON.stringify(createMarkingsFromDataWithMarks(data, 50)),
-      headers: {
-        'Content-type': 'application/json',
-        Authorization: 'Fake jack',
-      },
-    };
-    await fetch(url, fetchOptions);
-
-    url = 'https://sums-dev.jacek.cz/api/ongoing-cohorts';
-    response = await fetch(url);
-
-    assert.ok(
-      !response.ok,
-      'GET on /api/ongoing-cohort is not OK.',
-    );
-
-    fetchOptions = {
-      method: 'GET',
-      headers: {
-        Authorization: 'Fake axel',
-      },
-    };
-    response = await fetch(url, fetchOptions);
-
-    assert.ok(
-      response.ok,
-      'GET on /api/ongoing-cohort is OK.',
-    );
-
-    // mark a project on both sides
-
-    data = await response.json();
-    console.log(data);
-    for (let i=0; i<data.length; i+=1) {
-      assert.ok(
-        !data.closed,
-        'The cohort ' + data[i].year + data[i].unit + ' is not closed.',
-      );
-      const projects = data[i].projects;
-      for (let j=0; j<projects.length; j+=1) {
-        console.log('projet ' + j);
-        console.log(projects[j]);
-        const urlProject = 'https://sums-dev.jacek.cz/api/' + data[i].year + data[i].unit + '/' + projects[j].student + '/axel@fake.example.org'; // eslint-disable-line max-len
-        assert.ok(
-          Object.hasOwnProperty.call(projects[j], 'studentName'),
-          '`studentName` is set in the project ' + projects[j].title + '.',
-        );
-        const markings = projects[j].markings;
-        for (let k=0; k<markings.length; k+=1) {
-          console.log('markings : ' + k);
-          console.log(markings[k]);
-
-          // IF the user is the marker
-          if (markings[k].email === 'axel@fake.example.org') {
-            // IF he finished marking
-            if (typeof markings[k].finalizedMark === 'number') {
-              const responseProject = await fetch(urlProject, fetchOptions); // eslint-disable-line no-await-in-loop
-              const dataProject = await responseProject.json(); // eslint-disable-line no-await-in-loop
-              delete dataProject.project;
-              delete dataProject.name;
-            } else if (!Object.hasOwnProperty.call(markings[k], 'finalizedMark')) {
-              // IF he hasn't finished marking
-              const responseProject = await fetch(urlProject, fetchOptions); // eslint-disable-line no-await-in-loop
-              const dataProject = await responseProject.json(); // eslint-disable-line no-await-in-loop
-              delete dataProject.project;
-              delete dataProject.name;
-              assert.deepEqual(
-                markings[k],
-                dataProject,
-                'The data is correct when the current useris the marker and hasn\'nt finished marking.',
-              );
-            } else {
-              // IF he didn't start marking
-
-            }
-          }
-
-          // IF the user is not the marker AND another user hasn't marked yet
-          if (markings[k].email !== 'axel@fake.example.org' &&  typeof markings[(k+1)%markings.length].finalizedMark === 'number') { // eslint-disable-line max-len
-            assert.ok(
-              !Object.hasOwnProperty.call(markings[k], 'marks'),
-              'The marking form is not present for other users.',
-            );
-
-            assert.ok(
-              Object.hasOwnProperty.call(markings[k], 'role') && Object.hasOwnProperty.call(markings[k], 'email') && Object.hasOwnProperty.call(markings[k], 'finalizedMark'), // eslint-disable-line max-len
-              'For others users, returns role, email and finalizedMark.',
-            );
-
-            assert.ok(
-              data[i].projects[j].markings[k].finalizedMark === null || data[i].projects[j].markings[k].finalizedMark,
-              'For other users, `finalizedMark` is null or true.',
-            );
-          } else { // maybe deepEqual with data get from markings ?
-
-          }
-        }
-      }
-    }
-
-    // Create the enormous data to compare with.
-
-    // Check that depending of the user we don't get the same stuff.
-
-    // Check that the projects in there are all the user's projects.
-  },
-);
-
-const http = 'http://127.0.0.1:8080/';
-
 QUnit.test(
   'GET /api/1997PJS40/6',
   async (assert) => {
-    const url = http + 'api/1997PJE40/6';
+    // Execute the shell command to restore datas.
+
+    const command = cp.spawn('node', ['/var/www/html/projets/sums2017/tests/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2']); // eslint-disable-line max-len
+
+    // Uncomment the following function to see what do this command.
+    /*
+    command.stdout.on('data', (data) => {
+      console.log('Message: ' + data);
+    });
+    */
+
+    console.log('Restoration of datas.');
+    command.on('close', () => {
+      console.log('Restoration of datas complete.');
+    });
+    wait(15000); // Reset datas take a little too much time. If we don't do that, datas cannot be complete.
+
+    let url = localhost + 'api/1997PJE40/6';
+
+    // Here, we will see if access to this route is possible for someone who's not working on the project,
+    // and check if everything is normal for the others.
     let fetchOptionsGET = {
       method: 'GET',
       headers: {
         Authorization: 'Fake adrien',
       },
     };
-    const responseAdrien = await fetch(url, fetchOptionsGET);
+    let responseAdrien = await fetch(url, fetchOptionsGET);
     assert.ok(
       responseAdrien.ok,
       'GET on /api/1997PJE40/6 is OK with the moderator.',
@@ -592,9 +471,7 @@ QUnit.test(
         Authorization: 'Fake axel',
       },
     };
-
-    const responseAxel = await fetch(url, fetchOptionsGET);
-
+    let responseAxel = await fetch(url, fetchOptionsGET);
     assert.ok(
       responseAxel.ok,
       'GET on /api/1997PJE40/6 is OK with the supervisor.',
@@ -606,17 +483,16 @@ QUnit.test(
         Authorization: 'Fake jack',
       },
     };
-
     const response = await fetch(url, fetchOptionsGET);
-
     assert.ok(
       !response.ok,
       'GET on /api/1997PJE40/6 is not OK with another user.',
     );
 
-    const dataAdrien = await responseAdrien.json();
-    const dataAxel = await responseAxel.json();
+    let dataAdrien = await responseAdrien.json();
+    let dataAxel = await responseAxel.json();
 
+    // Here we check if informations given by the route are correct.
     // The data samples used below to do deepEquals were found by using curl.
 
     assert.deepEqual(
@@ -687,9 +563,8 @@ QUnit.test(
       'Informations are correct for marker Axel.',
     );
 
-    // Trying here to finalize the markings on a project, but we're still working on it.
-
-    /* url = http + 'api/1997PJE40/6/adrien@fake.example.org';
+    // Here, we will omplete marks for a project.
+    url = localhost + 'api/1997PJE40/6/adrien@fake.example.org';
     fetchOptionsGET = {
       method: 'GET',
       headers: {
@@ -704,14 +579,8 @@ QUnit.test(
     );
 
     dataAdrien = await responseAdrien.json();
-    const marking = createMarkingsFromData(dataAdrien);
-
-    Object.keys(marking.marks).forEach((key) => {
-      marking.marks[key].value = 80;
-    });
-    marking.generalComments = 'general comments ' * 10;
-
-    const fetchOptionsPOST = {
+    let marking = createEmptyMarking(dataAdrien.project.cohort.markingForm, dataAdrien.version);
+    let fetchOptionsPOST = {
       method: 'POST',
       body: JSON.stringify(marking),
       headers: {
@@ -719,37 +588,585 @@ QUnit.test(
         Authorization: 'Fake adrien',
       },
     };
-
-    responseAdrien = await fetch(url, fetchOptionsPOST);
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-    console.log(await responseAdrien.json());
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-
-    url = http + 'api/1997PJE40/6';
+    await fetch(url, fetchOptionsPOST);
     responseAdrien = await fetch(url, fetchOptionsGET);
-    console.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
-    console.log(await responseAdrien.json());
-    console.log('OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO'); */
+    let mark = 80;
+    dataAdrien = await responseAdrien.json();
+    marking = createMarking(dataAdrien.project.cohort.markingForm, dataAdrien.version, mark);
+    fetchOptionsPOST = {
+      method: 'POST',
+      body: JSON.stringify(marking),
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake adrien',
+      },
+    };
+    responseAdrien = await fetch(url, fetchOptionsPOST);
+    assert.ok(responseAdrien, 'should work');
+    responseAdrien = await fetch(url, fetchOptionsGET);
+    dataAdrien = await responseAdrien.json();
 
-    /*
-    * Should try what happened when both marker have put a mark and check if both markers can see the same informations.
-    */
+    marking.version = dataAdrien.version;
+    dataAdrien.finalizedMark = mark;
+    fetchOptionsPOST.body = JSON.stringify(dataAdrien);
 
-    // Execute the shell command to restore datas.
+    await fetch(url, fetchOptionsPOST);
+    assert.ok(responseAdrien, 'should work again');
+    responseAdrien = await fetch(url, fetchOptionsGET);
+    dataAdrien = await responseAdrien.json();
 
-    // const command = cp.spawn('node', ['toools/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2']); // eslint-disable-line max-len
+    // Here, we will check if new informations given by the routes are correct.
+    url = localhost + 'api/1997PJE40/6';
 
-// Uncomment the following function to see what do the command.
-/*
-    command.stdout.on('data', (data) => {
-      console.log('Message: ' + data);
-    });
-    */
-/*
-    console.log('Restoration of datas.');
-    command.on('close', () => {
-      console.log('Restoration of datas complete.');
-    });
+    fetchOptionsGET = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake adrien',
+      },
+    };
+    responseAdrien = await fetch(url, fetchOptionsGET);
+    assert.ok(
+      responseAdrien.ok,
+      'GET on /api/1997PJE40/6 is OK with the moderator.',
+    );
+    dataAdrien = await responseAdrien.json();
+    delete dataAdrien.markings[1].version;
+    assert.deepEqual(
+      dataAdrien,
+      {
+        student: '6',
+        studentName: 'Shepler, Anibal',
+        cohortId: '1997PJE40',
+        title: 'fake-testing project',
+        submitted: 'late',
+        cohort: {
+          year: 1997,
+          unit: 'PJE40',
+          closed: false,
+          coordinators: [
+            'adrien@fake.example.org',
+          ],
+        },
+        markings: [
+          {
+            role: 'supervisor',
+            email: 'axel@fake.example.org',
+            name: 'Fake axel',
+            finalizedMark: null,
+          },
+          {
+            prizeJustification: '',
+            plagiarismConcern: false,
+            generalComments: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // eslint-disable-line max-len
+            marks: {
+              'Evaluation against requirements': {
+                note: '',
+                mark: 80,
+              },
+              'Discussion of verification and validation': {
+                mark: 80,
+                note: '',
+              },
+              'Evidence of project planning and management': {
+                note: '',
+                mark: 80,
+              },
+              'Attributes of the solution': {
+                note: '',
+                mark: 80,
+              },
+              'Discussion of implementation': {
+                note: '',
+                mark: 80,
+              },
+              'Methodological approach': {
+                note: '',
+                mark: 80,
+              },
+              'Critical review of relevant literature': {
+                note: '',
+                mark: 80,
+              },
+              'Analysis and discussion of the IT design': {
+                note: '',
+                mark: 80,
+              },
+              'Structure and presentation': {
+                mark: 80,
+                note: '',
+              },
+              'Overall understanding and reflection': {
+                note: '',
+                mark: 80,
+              },
+              'Summary, conclusions and recommendations': {
+                note: '',
+                mark: 80,
+              },
+              'Statement of project’s context, aims and objectives': {
+                note: '',
+                mark: 80,
+              },
+              'Specification and discussion of the requirements': {
+                note: '',
+                mark: 80,
+              },
+            },
+            misconductConcern: false,
+            unfairnessComment: '',
+            role: 'moderator',
+            adjustment: 0,
+            email: 'adrien@fake.example.org',
+            finalizedMark: 80,
+            prizeNominations: [],
+            name: 'Fake adrien',
+          },
+        ],
+      },
+      'Informations are correct for marker Adrien.',
+    );
+
+    fetchOptionsGET = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    responseAxel = await fetch(url, fetchOptionsGET);
+    assert.ok(
+      responseAxel.ok,
+      'GET on /api/1997PJE40/6 is OK with the supervisor.',
+    );
+    dataAxel = await responseAxel.json();
+    assert.deepEqual(
+      dataAxel,
+      {
+        student: '6',
+        studentName: 'Shepler, Anibal',
+        cohortId: '1997PJE40',
+        title: 'fake-testing project',
+        submitted: 'late',
+        cohort: {
+          year: 1997,
+          unit: 'PJE40',
+          closed: false,
+          coordinators: [
+            'adrien@fake.example.org',
+          ],
+        },
+        markings: [
+          {
+            version: 11,
+            role: 'supervisor',
+            email: 'axel@fake.example.org',
+            name: 'Fake axel',
+          },
+          {
+            role: 'moderator',
+            email: 'adrien@fake.example.org',
+            name: 'Fake adrien',
+            finalizedMark: true,
+          },
+        ],
+      },
+      'Informations are correct for marker Axel.',
+    );
+
+    // Here, we will create marks for the second marker.
+    url = localhost + 'api/1997PJE40/6/axel@fake.example.org';
+    fetchOptionsGET = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    responseAxel = await fetch(url, fetchOptionsGET);
+
+    assert.ok(
+      responseAxel.ok,
+      'GET on /api/1997PJE40/6/axel@fake.example.org is OK.',
+    );
+
+    dataAxel = await responseAxel.json();
+    marking = createEmptyMarking(dataAxel.project.cohort.markingForm, dataAxel.version);
+    fetchOptionsPOST = {
+      method: 'POST',
+      body: JSON.stringify(marking),
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake axel',
+      },
+    };
+    await fetch(url, fetchOptionsPOST);
+    responseAxel = await fetch(url, fetchOptionsGET);
+    mark = 60;
+    dataAxel = await responseAxel.json();
+    marking = createMarking(dataAxel.project.cohort.markingForm, dataAxel.version, mark);
+    fetchOptionsPOST = {
+      method: 'POST',
+      body: JSON.stringify(marking),
+      headers: {
+        'Content-type': 'application/json',
+        Authorization: 'Fake axel',
+      },
+    };
+    responseAxel = await fetch(url, fetchOptionsPOST);
+    assert.ok(responseAxel, 'should work');
+    responseAxel = await fetch(url, fetchOptionsGET);
+    dataAxel = await responseAxel.json();
+
+    marking.version = dataAxel.version;
+    dataAxel.finalizedMark = mark;
+    fetchOptionsPOST.body = JSON.stringify(dataAxel);
+
+    await fetch(url, fetchOptionsPOST);
+    assert.ok(responseAxel, 'should work again');
+    responseAxel = await fetch(url, fetchOptionsGET);
+    dataAxel = await responseAxel.json();
+
+    // Here, we will check again if new informations given by the routes are correct.
+    url = localhost + 'api/1997PJE40/6';
+
+    fetchOptionsGET = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake adrien',
+      },
+    };
+    responseAdrien = await fetch(url, fetchOptionsGET);
+    assert.ok(
+      responseAdrien.ok,
+      'GET on /api/1997PJE40/6 is OK with the moderator.',
+    );
+    dataAdrien = await responseAdrien.json();
+    delete dataAdrien.markings[1].version;
+    delete dataAdrien.markings[0].version;
+
+    assert.deepEqual(
+      dataAdrien,
+      {
+        student: '6',
+        studentName: 'Shepler, Anibal',
+        cohortId: '1997PJE40',
+        title: 'fake-testing project',
+        submitted: 'late',
+        cohort: {
+          year: 1997,
+          unit: 'PJE40',
+          closed: false,
+          coordinators: [
+            'adrien@fake.example.org',
+          ],
+        },
+        markings: [
+          {
+            adjustment: 0,
+            email: 'axel@fake.example.org',
+            finalizedMark: 60,
+            prizeNominations: [],
+            prizeJustification: '',
+            plagiarismConcern: false,
+            generalComments: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // eslint-disable-line max-len
+            marks: {
+              'Structure and presentation': {
+                mark: 60,
+                note: '',
+              },
+              'Overall understanding and reflection': {
+                note: '',
+                mark: 60,
+              },
+              'Summary, conclusions and recommendations': {
+                note: '',
+                mark: 60,
+              },
+              'Statement of project’s context, aims and objectives': {
+                note: '',
+                mark: 60,
+              },
+              'Specification and discussion of the requirements': {
+                mark: 60,
+                note: '',
+              },
+              'Evaluation against requirements': {
+                mark: 60,
+                note: '',
+              },
+              'Discussion of verification and validation': {
+                note: '',
+                mark: 60,
+              },
+              'Evidence of project planning and management': {
+                note: '',
+                mark: 60,
+              },
+              'Attributes of the solution': {
+                note: '',
+                mark: 60,
+              },
+              'Discussion of implementation': {
+                note: '',
+                mark: 60,
+              },
+              'Methodological approach': {
+                mark: 60,
+                note: '',
+              },
+              'Critical review of relevant literature': {
+                mark: 60,
+                note: '',
+              },
+              'Analysis and discussion of the IT design': {
+                note: '',
+                mark: 60,
+              },
+            },
+            misconductConcern: false,
+            unfairnessComment: '',
+            role: 'supervisor',
+            name: 'Fake axel',
+          },
+          {
+            plagiarismConcern: false,
+            generalComments: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // eslint-disable-line
+            marks: {
+              'Structure and presentation': {
+                mark: 80,
+                note: '',
+              },
+              'Overall understanding and reflection': {
+                note: '',
+                mark: 80,
+              },
+              'Summary, conclusions and recommendations': {
+                note: '',
+                mark: 80,
+              },
+              'Statement of project’s context, aims and objectives': {
+                mark: 80,
+                note: '',
+              },
+              'Specification and discussion of the requirements': {
+                mark: 80,
+                note: '',
+              },
+              'Evaluation against requirements': {
+                mark: 80,
+                note: '',
+              },
+              'Discussion of verification and validation': {
+                mark: 80,
+                note: '',
+              },
+              'Evidence of project planning and management': {
+                note: '',
+                mark: 80,
+              },
+              'Attributes of the solution': {
+                mark: 80,
+                note: '',
+              },
+              'Discussion of implementation': {
+                note: '',
+                mark: 80,
+              },
+              'Methodological approach': {
+                note: '',
+                mark: 80,
+              },
+              'Critical review of relevant literature': {
+                note: '',
+                mark: 80,
+              },
+              'Analysis and discussion of the IT design': {
+                mark: 80,
+                note: '',
+              },
+            },
+            misconductConcern: false,
+            unfairnessComment: '',
+            role: 'moderator',
+            adjustment: 0,
+            email: 'adrien@fake.example.org',
+            finalizedMark: 80,
+            prizeNominations: [],
+            prizeJustification: '',
+            name: 'Fake adrien',
+          },
+        ],
+      },
+      'Informations are correct for marker Adrien.',
+    );
+
+    fetchOptionsGET = {
+      method: 'GET',
+      headers: {
+        Authorization: 'Fake axel',
+      },
+    };
+    responseAxel = await fetch(url, fetchOptionsGET);
+    assert.ok(
+      responseAxel.ok,
+      'GET on /api/1997PJE40/6 is OK with the moderator.',
+    );
+    dataAxel = await responseAxel.json();
+    delete dataAxel.markings[1].version;
+    delete dataAxel.markings[0].version;
+
+    assert.deepEqual(
+      dataAxel,
+      {
+        student: '6',
+        studentName: 'Shepler, Anibal',
+        cohortId: '1997PJE40',
+        title: 'fake-testing project',
+        submitted: 'late',
+        cohort: {
+          year: 1997,
+          unit: 'PJE40',
+          closed: false,
+          coordinators: [
+            'adrien@fake.example.org',
+          ],
+        },
+        markings: [
+          {
+            adjustment: 0,
+            email: 'axel@fake.example.org',
+            finalizedMark: 60,
+            prizeNominations: [],
+            prizeJustification: '',
+            plagiarismConcern: false,
+            generalComments: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // eslint-disable-line
+            marks: {
+              'Critical review of relevant literature': {
+                mark: 60,
+                note: '',
+              },
+              'Analysis and discussion of the IT design': {
+                mark: 60,
+                note: '',
+              },
+              'Structure and presentation': {
+                note: '',
+                mark: 60,
+              },
+              'Overall understanding and reflection': {
+                note: '',
+                mark: 60,
+              },
+              'Summary, conclusions and recommendations': {
+                note: '',
+                mark: 60,
+              },
+              'Statement of project’s context, aims and objectives': {
+                note: '',
+                mark: 60,
+              },
+              'Specification and discussion of the requirements': {
+                note: '',
+                mark: 60,
+              },
+              'Evaluation against requirements': {
+                note: '',
+                mark: 60,
+              },
+              'Discussion of verification and validation': {
+                note: '',
+                mark: 60,
+              },
+              'Evidence of project planning and management': {
+                mark: 60,
+                note: '',
+              },
+              'Attributes of the solution': {
+                note: '',
+                mark: 60,
+              },
+              'Discussion of implementation': {
+                mark: 60,
+                note: '',
+              },
+              'Methodological approach': {
+                note: '',
+                mark: 60,
+              },
+            },
+            misconductConcern: false,
+            unfairnessComment: '',
+            role: 'supervisor',
+            name: 'Fake axel',
+          },
+          {
+            email: 'adrien@fake.example.org',
+            finalizedMark: 80,
+            prizeNominations: [],
+            prizeJustification: '',
+            plagiarismConcern: false,
+            generalComments: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA', // eslint-disable-line
+            marks: {
+              'Discussion of verification and validation': {
+                note: '',
+                mark: 80,
+              },
+              'Evidence of project planning and management': {
+                note: '',
+                mark: 80,
+              },
+              'Attributes of the solution': {
+                note: '',
+                mark: 80,
+              },
+              'Discussion of implementation': {
+                note: '',
+                mark: 80,
+              },
+              'Methodological approach': {
+                note: '',
+                mark: 80,
+              },
+              'Critical review of relevant literature': {
+                note: '',
+                mark: 80,
+              },
+              'Analysis and discussion of the IT design': {
+                note: '',
+                mark: 80,
+              },
+              'Structure and presentation': {
+                note: '',
+                mark: 80,
+              },
+              'Overall understanding and reflection': {
+                note: '',
+                mark: 80,
+              },
+              'Summary, conclusions and recommendations': {
+                note: '',
+                mark: 80,
+              },
+              'Statement of project’s context, aims and objectives': {
+                note: '',
+                mark: 80,
+              },
+              'Specification and discussion of the requirements': {
+                note: '',
+                mark: 80,
+              },
+              'Evaluation against requirements': {
+                note: '',
+                mark: 80,
+              },
+            },
+            misconductConcern: false,
+            unfairnessComment: '',
+            role: 'moderator',
+            adjustment: 0,
+            name: 'Fake adrien',
+          },
+        ],
+      },
+      'Informations are correct for marker Axel.',
+    );
   },
 );
-*/
