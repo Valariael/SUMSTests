@@ -1,88 +1,10 @@
 'use strict';
 
 const fetch = require('node-fetch');
-const ds = require('.././tools/data-samples');
+const cp = require('child_process');
+const tft = require('.././tools/tools-for-testing.js');
 
-const localhost = 'http://localhost:8080/';
-
-/*
- *  createEmptyMarking creates the empty marking that is required to add a first mark,
- *  it uses the parameters to create each marking category as if they were empty.
- */
-function createEmptyMarking(markingForm, version) {
-  const markings = {};
-
-  markings.adjustment = 0;
-  markings.generalComments = '';
-  markings.marks = {};
-  for (let i=0; i<markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
-      markings.marks['' + String(markingForm.categories[i].name)] = { note: '' };
-    }
-  }
-  markings.misconductConcern = false;
-  markings.plagiarismConcern = false;
-  markings.prizeJustification = '';
-  markings.prizeNominations = [];
-  markings.unfairnessComment = '';
-  markings.version = version;
-
-  return markings;
-}
-
-/*
- *  createMarkingsFinalized creates a finalized marking, it uses the parameters
- *  to create each marking category with the same value `finalMark`.
- */
-function createMarkingsFinalized(markingForm, version, finalMark) {
-  const markings = {};
-
-  markings.adjustment = 0;
-  markings.generalComments = 'some comments '*50;
-  markings.marks = {};
-  for (let i=0; i<markingForm.categories.length; i+=1) {
-    if (Object.hasOwnProperty.call(markingForm.categories[i], 'name')) {
-      markings.marks['' + String(markingForm.categories[i].name)] = { mark: finalMark, note: '' };
-    }
-  }
-  markings.misconductConcern = false;
-  markings.plagiarismConcern = false;
-  markings.prizeJustification = '';
-  markings.prizeNominations = [];
-  markings.unfairnessComment = '';
-  markings.version = version;
-  markings.finalizedMark = finalMark;
-
-  return markings;
-}
-
-function reallyBigString() {
-  let str = '';
-
-  do {
-    str += '.';
-    if (str.length % 1000 === 0) {
-      str += '1000';
-    }
-  } while (str.length < 15000);
-
-  return str;
-}
-
-function findStaffWithEmail(email) {
-  for (let i=0; i<ds.staff.length; i+=1) {
-    if (ds.staff[i].email === email) return ds.staff[i].name;
-  }
-  return false;
-}
-
-function findCohortWithId(id) {
-  for (let i=0; i<ds.cohorts.length; i+=1) {
-    if (ds.cohorts[i].id === id) return ds.cohorts[i];
-  }
-  return false;
-}
-
+const localhost = 'http://localhost:8080/api/';
 const cohort = '1997PJE40';
 const studentId = 1001;
 const markerEmail = 'axel@fake.example.org';
@@ -92,14 +14,20 @@ describe('Testing the API', () => {
 
   // TESTING WITH CORRECT FAKE EMAIL
 
-  describe('GET /api/:cohort/:studentId/:markerEmail', async () => {
+  describe('GET /api/:cohort/:studentId/:markerEmail', () => {
     test('GET on /api/'+ cohort +'/'+ studentId +'/'+ markerEmail +' is OK.', async () => {
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+      const restoreData = cp.spawn('node', ['../sums2017/tests/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2', '--erase']);  // eslint-disable-line max-len
+      console.log('Restoration of datas.');
+      restoreData.on('close', () => {
+        console.log('Restoration of datas complete.');
+      });
+      tft.wait(5000);
+
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
       const fetchOptionsGET = {
         method: 'GET',
         headers: {
-          Authorization: 'Fake '+ emailParts[0],
+          Authorization: tft.findStaffWithEmail(markerEmail),
         },
       };
       const response = await fetch(url, fetchOptionsGET);
@@ -108,12 +36,12 @@ describe('Testing the API', () => {
     });
 
     test('The data received is correct.', async () => {
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
+      const marker = tft.findStaffWithEmail(markerEmail);
       const fetchOptionsGET = {
         method: 'GET',
         headers: {
-          Authorization: 'Fake '+ emailParts[0],
+          Authorization: marker,
         },
       };
       let response = await fetch(url, fetchOptionsGET);
@@ -127,7 +55,7 @@ describe('Testing the API', () => {
 
       // Creating default marks.
 
-      const marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
+      const marking = tft.createEmptyMarking(data.project.cohort.markingForm, data.version);
 
       // First POST to get version number.
 
@@ -136,7 +64,7 @@ describe('Testing the API', () => {
         body: JSON.stringify(marking),
         headers: {
           'Content-type': 'application/json',
-          Authorization: 'Fake '+ emailParts[0],
+          Authorization: marker,
         },
       };
 
@@ -145,14 +73,14 @@ describe('Testing the API', () => {
 
       marking.role = data.role;
       marking.email = markerEmail;
-      marking.name = 'Fake '+ emailParts[0];
+      marking.name = marker;
       marking.version = dataVersion.version;
       marking.project = {
         student: '' + studentId,
         studentName: data.project.studentName,
         title: data.project.title,
       };
-      marking.project.cohort = findCohortWithId(cohort);
+      marking.project.cohort = tft.findCohortWithId(cohort);
 
       // Deleting useless attributes.
 
@@ -170,26 +98,25 @@ describe('Testing the API', () => {
     });
   });
 
-  describe('POST /api/:cohort/:studentId/:markerEmail', async () => {
+  describe('POST /api/:cohort/:studentId/:markerEmail', () => {
     test('POST on /api/' + cohort +'/'+ studentId +'/'+ markerEmail + ' is OK.', async () => {
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
+      const marker = tft.findStaffWithEmail(markerEmail);
       let fetchOptions = {
         method: 'GET',
         headers: {
-          Authorization: 'Fake '+ emailParts[0],
+          Authorization: marker,
         },
       };
-
       let response = await fetch(url, fetchOptions);
       const data = await response.json();
 
       fetchOptions = {
         method: 'POST',
-        body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
+        body: JSON.stringify(tft.createEmptyMarking(data.project.cohort.markingForm, data.version)),
         headers: {
           'Content-type': 'application/json',
-          Authorization: 'Fake ' + emailParts[0],
+          Authorization: marker,
         },
       };
       response = await fetch(url, fetchOptions);
@@ -198,8 +125,7 @@ describe('Testing the API', () => {
     });
 
     test('POST on /api/' + cohort +'/'+ studentId +'/'+ markerEmail + ' with wrong data raises a `Bad request` exception', async () => { // eslint-disable-line max-len
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
       /* fetchOptions = {
         method: 'GET',
         headers: {
@@ -216,7 +142,7 @@ describe('Testing the API', () => {
         body: JSON.stringify(),
         headers: {
           'Content-type': 'application/json',
-          Authorization: 'Fake ' + emailParts[0],
+          Authorization: tft.findStaffWithEmail(markerEmail),
         },
       };
       const response = await fetch(url, fetchOptions);
@@ -227,12 +153,11 @@ describe('Testing the API', () => {
     });
 
     test('POST on /api/' + cohort +'/'+ studentId +'/'+ markerEmail + ' with a wrong token raises a `Forbidden` exception', async () => { // eslint-disable-line max-len
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
       let fetchOptions = {
         method: 'GET',
         headers: {
-          Authorization: 'Fake ' + emailParts[0],
+          Authorization: tft.findStaffWithEmail(markerEmail),
         },
       };
       let response = await fetch(url, fetchOptions);
@@ -240,7 +165,7 @@ describe('Testing the API', () => {
 
       fetchOptions = {
         method: 'POST',
-        body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
+        body: JSON.stringify(tft.createEmptyMarking(data.project.cohort.markingForm, data.version)),
         headers: {
           'Content-type': 'application/json',
           Authorization: 'Fake people',
@@ -253,26 +178,26 @@ describe('Testing the API', () => {
       expect(response.statusText).toBe('Forbidden');
     });
 
-    test('POST on /api/1997PJS40/3/axel@fake.example.org is OK with a really big string as note.', async () => {
-      const emailParts = markerEmail.split('@');
-      const url = localhost + 'api/'+ cohort +'/'+ studentId +'/'+ markerEmail;
+    test('POST on /api/'+ cohort +'/'+ studentId +'/'+ markerEmail +' is OK with a really big string as note.', async () => { // eslint-disable-line max-len
+      const marker = tft.findStaffWithEmail(markerEmail);
+      const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
       let fetchOptions = {
         method: 'GET',
         headers: {
-          Authorization: 'Fake ' + emailParts[0],
+          Authorization: marker,
         },
       };
       let response = await fetch(url, fetchOptions);
       const data = await response.json();
-      const marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
-      marking.generalComments = reallyBigString();
+      const marking = tft.createEmptyMarking(data.project.cohort.markingForm, data.version);
+      marking.generalComments = tft.reallyBigString();
 
       fetchOptions = {
         method: 'POST',
         body: JSON.stringify(marking),
         headers: {
           'Content-type': 'application/json',
-          Authorization: 'Fake ' + emailParts[0],
+          Authorization: marker,
         },
       };
       response = await fetch(url, fetchOptions);
@@ -283,7 +208,7 @@ describe('Testing the API', () => {
 
   describe('Test of fake authentication', () => {
     test('GET on /api/ongoing-cohort is not OK without auth and raises an `Unauthorized` exception.', async () => {
-      const url = localhost + 'api/ongoing-cohorts';
+      const url = localhost + 'ongoing-cohorts';
       const response = await fetch(url);
 
       expect(response.ok).toBeFalsy();
@@ -292,10 +217,10 @@ describe('Testing the API', () => {
     });
 
     test('GET on /api/ongoing-cohort is OK with fake auth.', async () => {
-      const url = localhost + 'api/ongoing-cohorts';
+      const url = localhost + 'ongoing-cohorts';
       const fetchOptions = {
         method: 'GET',
-        headers: { Authorization: 'Fake user' },
+        headers: { Authorization: 'Fake jack' },
       };
       const response = await fetch(url, fetchOptions);
 
@@ -303,9 +228,9 @@ describe('Testing the API', () => {
     });
   });
 
-  describe('Test of the version number', async () => {
-    test('GET on /api/1997PJS40/3/axel@fake.example.org is OK.', async () => {
-      const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
+  describe('Test of the version number', () => {
+    test('GET on /api/1997PJS40/1002/axel@fake.example.org is OK.', async () => {
+      const url = localhost + '1997PJS40/1002/axel@fake.example.org';
       const fetchOptions = {
         method: 'GET',
         headers: {
@@ -318,7 +243,7 @@ describe('Testing the API', () => {
     });
 
     test('The new version number is superior to the old version number.', async () => {
-      const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
+      const url = localhost + '1997PJS40/1002/axel@fake.example.org';
       let fetchOptions = {
         method: 'GET',
         headers: {
@@ -330,7 +255,7 @@ describe('Testing the API', () => {
 
       fetchOptions = {
         method: 'POST',
-        body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
+        body: JSON.stringify(tft.createEmptyMarking(data.project.cohort.markingForm, data.version)),
         headers: {
           'Content-type': 'application/json',
           Authorization: 'Fake axel',
@@ -343,7 +268,7 @@ describe('Testing the API', () => {
     });
 
     test('The version number changed and is correct.', async () => {
-      const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
+      const url = localhost + '1997PJS40/1002/axel@fake.example.org';
       let fetchOptions = {
         method: 'GET',
         headers: {
@@ -355,7 +280,7 @@ describe('Testing the API', () => {
 
       fetchOptions = {
         method: 'POST',
-        body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version)),
+        body: JSON.stringify(tft.createEmptyMarking(data.project.cohort.markingForm, data.version)),
         headers: {
           'Content-type': 'application/json',
           Authorization: 'Fake axel',
@@ -376,8 +301,8 @@ describe('Testing the API', () => {
       expect(data.version).toBe(postReturn.version);
     });
 
-    test('POST on /api/1997PJS40/3/axel@fake.example.org is not OK with a wrong version number and raises a `Conflict` exception.', async () => { // eslint-disable-line max-len
-      const url = localhost + 'api/1997PJS40/3/axel@fake.example.org';
+    test('POST on /api/1997PJS40/1002/axel@fake.example.org is not OK with a wrong version number and raises a `Conflict` exception.', async () => { // eslint-disable-line max-len
+      const url = localhost + '1997PJS40/1002/axel@fake.example.org';
       let fetchOptions = {
         method: 'GET',
         headers: {
@@ -389,7 +314,7 @@ describe('Testing the API', () => {
 
       fetchOptions = {
         method: 'POST',
-        body: JSON.stringify(createEmptyMarking(data.project.cohort.markingForm, data.version-1)),
+        body: JSON.stringify(tft.createEmptyMarking(data.project.cohort.markingForm, data.version-1)),
         headers: {
           'Content-type': 'application/json',
           Authorization: 'Fake axel',
@@ -400,6 +325,65 @@ describe('Testing the API', () => {
       expect(response.ok).toBeFalsy();
       expect(response.status).toBe(409);
       expect(response.statusText).toBe('Conflict');
+    });
+  });
+
+  // describe('GET /api/ongoing-cohorts', () => {
+  //   test('');
+  // });
+
+  describe('POST on /api/:cohort/:studentId/reconciliation', () => {
+    test('POST on /api/1997PJE40/1005/reconciliation', async () => {
+      await tft.markOnBothSidesForReconciliation();
+
+      const url = localhost + '1997PJE40/1005/reconciliation';
+      const marker = tft.findStaffWithEmail('axel@fake.example.org');
+      const reconcileData = {
+        type: 'reconcile',
+        finalMark: 45,
+        reconciliationComment: 'some comments some comments some comments some comments some comments some comments some comments some comments ', // eslint-disable-line max-len
+      };
+      const fetchOptions = {
+        method: 'POST',
+        body: JSON.stringify(reconcileData),
+        headers: {
+          'Content-type': 'application/json',
+          Authorization: marker,
+        },
+      };
+
+      const response = await fetch(url, fetchOptions);
+      expect(response.ok).toBeTruthy();
+      expect(response.status).toBe(204);
+      expect(response.statusText).toBe('No Content');
+    });
+  });
+
+  describe('POST on /api/:cohort/:studentId/feedback', () => {
+    test('POST on /api/1997PJS40/1004/feedback', async () => {
+      // First we have to finalize the markings of a project
+
+      await tft.finalizeMarkOnBothSides('1997PJS40', '1004', ['axel@fake.example.org', 'jack@fake.example.org']);
+
+      const url = localhost + '1997PJS40/1004/feedback';
+      const marker = tft.findStaffWithEmail('axel@fake.example.org');
+      const feedbackData = {
+        type: 'moderateFeedback',
+        feedbackForStudent: 'some comments some comments some comments some comments some comments some comments some comments some comments ', // eslint-disable-line max-len
+      };
+      const fetchOptions = {
+        method: 'POST',
+        body: JSON.stringify(feedbackData),
+        headers: {
+          'Content-type': 'application/json',
+          Authorization: marker,
+        },
+      };
+
+      const response = await fetch(url, fetchOptions);
+      expect(response.ok).toBeTruthy();
+      expect(response.status).toBe(204);
+      expect(response.statusText).toBe('No Content');
     });
   });
 });
