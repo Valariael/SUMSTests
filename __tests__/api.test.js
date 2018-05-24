@@ -9,22 +9,17 @@ const cohort = '1997PJE40';
 const studentId = 1001;
 const markerEmail = 'axel@fake.example.org';
 
+cp.spawnSync('node', ['../sums2017/tests/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2', '--erase']);  // eslint-disable-line max-len
+
 describe('Testing the API', () => {
   // We'll have to make a loop that goes through all the routes
 
   // TESTING WITH CORRECT FAKE EMAIL
-  // put stringify in function
 
   describe('GET /api/:cohort/:studentId/:markerEmail', () => {
     test('GET on /api/'+ cohort +'/'+ studentId +'/'+ markerEmail +' is OK.', async () => {
-      /* const restoreData = */ cp.spawnSync('node', ['../sums2017/tests/generate-simple-test-data.js', '-f', '--overwrite', '-n', 'restricted-tests-2', '--erase']);  // eslint-disable-line max-len
-      console.log('Restoration of datas.');
-      // restoreData.on('close', () => {
-      //   console.log('Restoration of datas complete.');
-      // });
-
       const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
-      const response = await fetch(url, tools.optionsForFetch('GET', tools.findStaffWithEmail(markerEmail)));
+      const response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
 
       expect(response.ok).toBeTruthy();
     });
@@ -32,7 +27,7 @@ describe('Testing the API', () => {
     test('The data received is correct.', async () => {
       const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
       const marker = tools.findStaffWithEmail(markerEmail);
-      let response = await fetch(url, tools.optionsForFetch('GET', marker, null));
+      let response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
       // let response = await tools.fetch(url, 'GET', marker);
 
       /*
@@ -48,7 +43,7 @@ describe('Testing the API', () => {
 
       // First POST to get version number.
 
-      const versionReturned = await fetch(url, tools.optionsForFetch('POST', marker, JSON.stringify(marking)));
+      const versionReturned = await fetch(url, tools.optionsForFetch('POST', markerEmail, marking));
       const dataVersion = await versionReturned.json();
 
       marking.role = data.role;
@@ -72,7 +67,7 @@ describe('Testing the API', () => {
 
       // End of creation.
 
-      response = await fetch(url, tools.optionsForFetch('GET', marker));
+      response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
 
       expect(await response.json()).toEqual(marking);
     });
@@ -81,11 +76,10 @@ describe('Testing the API', () => {
   describe('POST /api/:cohort/:studentId/:markerEmail', () => {
     test('POST on /api/' + cohort +'/'+ studentId +'/'+ markerEmail + ' is OK.', async () => {
       const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
-      const marker = tools.findStaffWithEmail(markerEmail);
-      let response = await fetch(url, tools.optionsForFetch('GET', marker));
+      let response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
       const data = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('POST', marker, JSON.stringify(tools.createEmptyMarking(data.project.cohort.markingForm, data.version)))); // eslint-disable-line max-len
+      response = await fetch(url, tools.optionsForFetch('POST', markerEmail, tools.createEmptyMarking(data.project.cohort.markingForm, data.version))); // eslint-disable-line max-len
 
       expect(response.ok).toBeTruthy();
     });
@@ -103,7 +97,7 @@ describe('Testing the API', () => {
       let marking = createEmptyMarking(data.project.cohort.markingForm, data.version);
       marking.role = 'wrong_role'; */
 
-      const response = await fetch(url, tools.optionsForFetch('POST', tools.findStaffWithEmail(markerEmail), JSON.stringify())); // eslint-disable-line max-len
+      const response = await fetch(url, tools.optionsForFetch('POST', markerEmail, '')); // eslint-disable-line max-len
 
       expect(response.ok).toBeFalsy();
       expect(response.status).toBe(400);
@@ -111,25 +105,24 @@ describe('Testing the API', () => {
 
     test('POST on /api/' + cohort +'/'+ studentId +'/'+ markerEmail + ' with a wrong token raises a `Forbidden` exception', async () => { // eslint-disable-line max-len
       const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
-      let response = await fetch(url, tools.optionsForFetch('GET', tools.findStaffWithEmail(markerEmail)));
+      let response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
       const data = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('POST', 'Fake people', JSON.stringify(tools.createEmptyMarking(data.project.cohort.markingForm, data.version)))); // eslint-disable-line max-len
+      response = await fetch(url, tools.optionsForFetch('POST', 'people@fake.example.org', tools.createEmptyMarking(data.project.cohort.markingForm, data.version))); // eslint-disable-line max-len
 
       expect(response.ok).toBeFalsy();
       expect(response.status).toBe(403);
     });
 
     test('POST on /api/'+ cohort +'/'+ studentId +'/'+ markerEmail +' is OK with a really big string as note.', async () => { // eslint-disable-line max-len
-      const marker = tools.findStaffWithEmail(markerEmail);
       const url = localhost + cohort +'/'+ studentId +'/'+ markerEmail;
 
-      let response = await fetch(url, tools.optionsForFetch('GET', marker));
+      let response = await fetch(url, tools.optionsForFetch('GET', markerEmail));
       const data = await response.json();
       const marking = tools.createEmptyMarking(data.project.cohort.markingForm, data.version);
       marking.generalComments = tools.reallyBigString();
 
-      response = await fetch(url, tools.optionsForFetch('POST', marker, JSON.stringify(marking)));
+      response = await fetch(url, tools.optionsForFetch('POST', markerEmail, marking));
 
       expect(response.ok).toBeTruthy();
     });
@@ -146,7 +139,7 @@ describe('Testing the API', () => {
 
     test('GET on /api/ongoing-cohort is OK with fake auth.', async () => {
       const url = localhost + 'ongoing-cohorts';
-      const response = await fetch(url, tools.optionsForFetch('GET', 'Fake jack'));
+      const response = await fetch(url, tools.optionsForFetch('GET', 'jack@fake.example.org'));
 
       expect(response.ok).toBeTruthy();
     });
@@ -155,17 +148,17 @@ describe('Testing the API', () => {
   describe('Test of the version number', () => {
     test('GET on /api/1997PJS40/1002/axel@fake.example.org is OK.', async () => {
       const url = localhost + '1997PJS40/1002/axel@fake.example.org';
-      const response = await fetch(url, tools.optionsForFetch('GET', 'Fake axel'));
+      const response = await fetch(url, tools.optionsForFetch('GET', 'axel@fake.example.org'));
 
       expect(response.ok).toBeTruthy();
     });
 
     test('The new version number is superior to the old version number.', async () => {
       const url = localhost + '1997PJS40/1002/axel@fake.example.org';
-      let response = await fetch(url, tools.optionsForFetch('GET', 'Fake axel'));
+      let response = await fetch(url, tools.optionsForFetch('GET', 'axel@fake.example.org'));
       const data = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('POST', 'Fake axel', JSON.stringify(tools.createEmptyMarking(data.project.cohort.markingForm, data.version)))); // eslint-disable-line max-len
+      response = await fetch(url, tools.optionsForFetch('POST', 'axel@fake.example.org', tools.createEmptyMarking(data.project.cohort.markingForm, data.version))); // eslint-disable-line max-len
       const postReturn = await response.json();
 
       expect(postReturn.version).toBeGreaterThan(data.version);
@@ -173,13 +166,13 @@ describe('Testing the API', () => {
 
     test('The version number changed and is correct.', async () => {
       const url = localhost + '1997PJS40/1002/axel@fake.example.org';
-      let response = await fetch(url, tools.optionsForFetch('GET', 'Fake axel'));
+      let response = await fetch(url, tools.optionsForFetch('GET', 'axel@fake.example.org'));
       let data = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('POST', 'Fake axel', JSON.stringify(tools.createEmptyMarking(data.project.cohort.markingForm, data.version)))); // eslint-disable-line max-len
+      response = await fetch(url, tools.optionsForFetch('POST', 'axel@fake.example.org', tools.createEmptyMarking(data.project.cohort.markingForm, data.version))); // eslint-disable-line max-len
       const postReturn = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('GET', 'Fake axel'));
+      response = await fetch(url, tools.optionsForFetch('GET', 'axel@fake.example.org'));
       data = await response.json();
 
       expect(data.version).toBe(postReturn.version);
@@ -187,10 +180,10 @@ describe('Testing the API', () => {
 
     test('POST on /api/1997PJS40/1002/axel@fake.example.org is not OK with a wrong version number and raises a `Conflict` exception.', async () => { // eslint-disable-line max-len
       const url = localhost + '1997PJS40/1002/axel@fake.example.org';
-      let response = await fetch(url, tools.optionsForFetch('GET', 'Fake axel'));
+      let response = await fetch(url, tools.optionsForFetch('GET', 'axel@fake.example.org'));
       const data = await response.json();
 
-      response = await fetch(url, tools.optionsForFetch('POST', 'Fake axel', JSON.stringify(tools.createEmptyMarking(data.project.cohort.markingForm, data.version-1)))); // eslint-disable-line max-len
+      response = await fetch(url, tools.optionsForFetch('POST', 'axel@fake.example.org', tools.createEmptyMarking(data.project.cohort.markingForm, data.version-1))); // eslint-disable-line max-len
 
       expect(response.ok).toBeFalsy();
       expect(response.status).toBe(409);
@@ -202,13 +195,12 @@ describe('Testing the API', () => {
       await tools.markOnBothSidesForReconciliation();
 
       const url = localhost + '1997PJE40/1005/reconciliation';
-      const marker = tools.findStaffWithEmail('axel@fake.example.org');
       const reconcileData = {
         type: 'reconcile',
         finalMark: 45,
         reconciliationComment: 'some comments some comments some comments some comments some comments some comments some comments some comments ', // eslint-disable-line max-len
       };
-      const response = await fetch(url, tools.optionsForFetch('POST', marker, JSON.stringify(reconcileData)));
+      const response = await fetch(url, tools.optionsForFetch('POST', markerEmail, reconcileData));
 
       expect(response.ok).toBeTruthy();
       expect(response.status).toBe(204);
@@ -222,12 +214,11 @@ describe('Testing the API', () => {
       await tools.finalizeMarkOnBothSides('1997PJS40', '1004', ['axel@fake.example.org', 'jack@fake.example.org']);
 
       const url = localhost + '1997PJS40/1004/feedback';
-      const marker = tools.findStaffWithEmail('axel@fake.example.org');
       const feedbackData = {
         type: 'moderateFeedback',
         feedbackForStudent: 'some comments some comments some comments some comments some comments some comments some comments some comments ', // eslint-disable-line max-len
       };
-      const response = await fetch(url, tools.optionsForFetch('POST', marker, JSON.stringify(feedbackData)));
+      const response = await fetch(url, tools.optionsForFetch('POST', markerEmail, feedbackData));
 
       expect(response.ok).toBeTruthy();
       expect(response.status).toBe(204);

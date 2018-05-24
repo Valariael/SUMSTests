@@ -227,16 +227,17 @@ function wait(ms) {
   }
 }
 
-function optionsForFetch(type, marker, body) {
+function optionsForFetch(type, email, body) {
+  const name = email.split('@')[0];
   const fetchOptions = {
     method: type,
     headers: {
-      Authorization: marker,
+      Authorization: 'Fake ' + name,
     },
   };
   if (type === 'POST') {
     fetchOptions.headers['Content-type'] = 'application/json';
-    fetchOptions.body = body;
+    fetchOptions.body = JSON.stringify(body);
   }
 
   return fetchOptions;
