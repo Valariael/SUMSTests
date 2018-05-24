@@ -227,6 +227,21 @@ function wait(ms) {
   }
 }
 
+function optionsForFetch(type, marker, body) {
+  const fetchOptions = {
+    method: type,
+    headers: {
+      Authorization: marker,
+    },
+  };
+  if (type === 'POST') {
+    fetchOptions.headers['Content-type'] = 'application/json';
+    fetchOptions.body = body;
+  }
+
+  return fetchOptions;
+}
+
 module.exports = {
   createEmptyMarking,
   createMarkings,
@@ -237,4 +252,5 @@ module.exports = {
   findStaffWithEmail,
   reallyBigString,
   wait,
+  optionsForFetch,
 };
